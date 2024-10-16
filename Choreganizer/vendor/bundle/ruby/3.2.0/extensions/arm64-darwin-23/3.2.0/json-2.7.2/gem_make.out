@@ -1,0 +1,16 @@
+current directory: /Users/beatricehackman/Desktop/csen-174-f24-project-chorganizer-use-this-one/Choreganizer/vendor/bundle/ruby/3.2.0/gems/json-2.7.2/ext/json
+/Users/beatricehackman/.rbenv/versions/3.2.2/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/beatricehackman/Desktop/csen-174-f24-project-chorganizer-use-this-one/Choreganizer/vendor/bundle/ruby/3.2.0/gems/json-2.7.2/ext/json
+make DESTDIR\= sitearchdir\=./.gem.20241016-64889-oxhi5a sitelibdir\=./.gem.20241016-64889-oxhi5a clean
+
+current directory: /Users/beatricehackman/Desktop/csen-174-f24-project-chorganizer-use-this-one/Choreganizer/vendor/bundle/ruby/3.2.0/gems/json-2.7.2/ext/json
+make DESTDIR\= sitearchdir\=./.gem.20241016-64889-oxhi5a sitelibdir\=./.gem.20241016-64889-oxhi5a
+make: Nothing to be done for `all'.
+
+current directory: /Users/beatricehackman/Desktop/csen-174-f24-project-chorganizer-use-this-one/Choreganizer/vendor/bundle/ruby/3.2.0/gems/json-2.7.2/ext/json
+make DESTDIR\= sitearchdir\=./.gem.20241016-64889-oxhi5a sitelibdir\=./.gem.20241016-64889-oxhi5a install
+
+current directory: /Users/beatricehackman/Desktop/csen-174-f24-project-chorganizer-use-this-one/Choreganizer/vendor/bundle/ruby/3.2.0/gems/json-2.7.2/ext/json
+make DESTDIR\= sitearchdir\=./.gem.20241016-64889-oxhi5a sitelibdir\=./.gem.20241016-64889-oxhi5a clean
