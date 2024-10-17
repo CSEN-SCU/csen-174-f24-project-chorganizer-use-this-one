@@ -1,130 +1,51 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 import React from 'react';
-import type {PropsWithChildren} from 'react';
-//import backgroundImage from "./images/backgroundBlur.png";
+
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
   StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-  ImageBackground,
-  Image,
-  Button
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-// type SectionProps = PropsWithChildren<{
-//   title: string;
-// }>;
 
-// function Section({children, title}: SectionProps): React.JSX.Element {
-//   const isDarkMode = useColorScheme() === 'dark';
-//   return (
-//     <View style={styles.sectionContainer}>
-//       <Text
-//         style={[
-//           styles.sectionTitle,
-//           {
-//             color: isDarkMode ? Colors.white : Colors.black,
-//           },
-//         ]}>
-//         {title}
-//       </Text>
-//       <Text
-//         style={[
-//           styles.sectionDescription,
-//           {
-//             color: isDarkMode ? Colors.light : Colors.dark,
-//           },
-//         ]}>
-//         {children}
-//       </Text>
-//     </View>
-//   );
-// }
+//pages
+import Launch from './pages/Launch';
+import Personal from './pages/Personal';
+import Home from './pages/Home';
+import Notifications from './pages/Notifications';
+import Settings from './pages/Settings';
+
+//page names
+const launchName = "Launch";
+const personalName = "Personal";
+const homeName = "Home";
+const notificationName = "Notification";
+const settingsName = "Settings";
+
+
+const Tab = createBottomTabNavigator();
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
   return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
-        <ImageBackground source={require('./assets/images/backgroundBlur.png')} style={styles.background} // Set a proper style
-        resizeMode="cover" >
-          <Image
-            style={styles.houseGraphic}
-            source={require('./assets/images/houseGraphic.png')}
-          />
-          <Text style={styles.h2}>welcome to</Text>
-          <Text style={styles.h1}>Choreganizer!</Text>
-          <Button
-            onPress={()=>console.log("hello world!")}
-            title="Create a home"
-            color='#6D74C9'
-          />
-          <Button
-            onPress={()=>console.log("hello world!")}
-            title="Join a home"
-            accessibilityLabel="Learn more about this purple button"
-            color='#000'
-          />
-        </ImageBackground>
-      </View>
+    <NavigationContainer>
+        <Tab.Navigator initialRouteName='Launch'>
+          <Tab.Screen name={launchName} component={Launch} options={{ headerShown: false }}/>
+          <Tab.Screen name={personalName} component={Personal} options={{ headerShown: false }}/>
+          <Tab.Screen name={homeName} component={Home} options={{ headerShown: false }}/>
+          <Tab.Screen name={notificationName} component={Notifications} options={{ headerShown: false }}/>
+          <Tab.Screen name={settingsName} component={Settings} options={{ headerShown: false }}/>
+      </Tab.Navigator>
+    </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
-   background: {
-    flex: 1, 
-    justifyContent: 'center',  
-    alignItems: 'center',
-    width: '100%' 
-  },
-  houseGraphic: {
-    width: 300,
-    height: 300,  // Add a height here to avoid cropping
-    resizeMode: 'contain', // Use contain to keep the aspect ratio
-  },
-  h1: {
-    color: '#5A4C9C',
-    fontWeight: 'bold',
-    fontSize: 48
-  },
-  h2: {
-    color: '#6D74C9',
-    fontWeight: 'bold',
-    fontSize: 32
-  },
-  buttonPrimary:{
-    color: '#6D74C9'
-  },
-  buttonSecondary:{
-
-  },
+  background: {
+   flex: 1, 
+   justifyContent: 'center',  
+   alignItems: 'center',
+   width: '100%' 
+  }
 });
 
 export default App;
