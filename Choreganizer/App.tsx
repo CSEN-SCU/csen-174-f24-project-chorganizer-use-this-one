@@ -39,13 +39,4 @@ function App(): React.JSX.Element {
   );
 }
 
-const styles = StyleSheet.create({
-  background: {
-   flex: 1, 
-   justifyContent: 'center',  
-   alignItems: 'center',
-   width: '100%' 
-  }
-});
-
 export default App;
