@@ -1,13 +1,21 @@
 import React, {useState} from 'react';
-import {View, Text, TouchableOpacity, FlatList, StyleSheet} from 'react-native';
-
+import {View, Text, TouchableOpacity, FlatList, StyleSheet, Pressable} from 'react-native';
 
 const ExpandableListItem = ({item}) => {
   const [expanded, setExpanded] = useState(false);
+  const [taskStatuses, setTaskStatuses] = useState(item.tasks.map(task => task.status));
 
+  console.log(item);
   const toggleExpand = () => {
     setExpanded(!expanded);
   };
+
+  const toggleStatus = (index) => {
+    const updatedStatuses = [...taskStatuses];
+    updatedStatuses[index] = !updatedStatuses[index];
+    setTaskStatuses(updatedStatuses);
+  };
+
 
   return (
     <View style={styles.itemContainer}>
@@ -18,15 +26,17 @@ const ExpandableListItem = ({item}) => {
       {expanded && (
         <FlatList
           data={item.tasks}
-          renderItem={({item}) => (
-            <View style={styles.choreItem}>
-            <View>
-                <Text style={styles.h8}>{item.time}</Text>
-                <Text style={styles.h6}>{item.chore}</Text>
-            </View>
-            {item.status ? <Text>✅</Text> : <Text>⭕️</Text>}
-            </View>
-          )}
+          renderItem={({item, index}) => {
+            return(
+                <Pressable style={styles.choreItem} onPress={() => toggleStatus(index)}>
+                    <View>
+                        <Text style={styles.h8}>{item.time}</Text>
+                        <Text style={styles.h6}>{item.chore}</Text>
+                    </View>
+                    {taskStatuses[index] ? <Text>✅</Text> : <Text>⭕️</Text>}
+                </Pressable>
+            )
+          }}
         />
       )}
     </View>
@@ -35,7 +45,6 @@ const ExpandableListItem = ({item}) => {
 
 const ExpandableList = ({data}) => {
   const renderItem = ({item}) => <ExpandableListItem item={item} />;
-
   return (
     <FlatList
       data={data}
@@ -85,6 +94,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    width: '100%'
   },
   itemTitle: {
     color: '#656565',
