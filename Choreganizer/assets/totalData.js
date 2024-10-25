@@ -24,7 +24,34 @@ export const totalData = {
                     {time: '1 week', chore: 'clean fridge', status: true},
                   ],
                 },
-              ]
+            ],
+            notifications: [
+              {
+                time: "10 mins ago",
+                message: "10 day streak!",
+                tags: "Achievement"
+              },
+              {
+                time: "3 hours ago",
+                message: "Spill in the kitchen",
+                tags: "Mess reported"
+              },
+              {
+                time: "1 day ago",
+                message: "Mop floors",
+                tags: "Bump 👊"
+              },
+              {
+                time: "1 day ago",
+                message: "Bleach towels",
+                tags: "Reminder"
+              },
+              {
+                time: "3 days ago",
+                message: "Wipe stovetop",
+                tags: "Bump 👊"
+              }
+            ]
         },
         {name: "Madison",
             chores: [
