@@ -57,6 +57,7 @@ function Personal({navigation}: {navigation: any}): React.JSX.Element {
         resizeMode="cover">
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'flex-start'}} >
           {/* Hi __ Section */}
+          <Pressable onPress={()=>navigation.navigate('Launch')}><Text>DEV ROUTE: Load Launch</Text></Pressable>
           <View
             style={{
               display: 'flex',
