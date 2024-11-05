@@ -92,7 +92,7 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
               accessibilityLabel="Open notifications"
             >
               <Image
-                style={styles.notificationIcon}
+                style={{ width: 60, height: 60}}
                 source={require('../assets/images/Inbox.png')}
               />
             </Pressable>
@@ -108,7 +108,7 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
           >
             <Image
               style={styles.reportIcon}
-              source={require('../assets/images/ReportIcon.png')}
+              // source={require('../assets/images/ReportIcon.png')}
             />
             <Text style={styles.reportButtonText}>Report a Mess</Text>
           </TouchableOpacity>
@@ -117,10 +117,7 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
           <View style={styles.choreContainer}>
             <View style={styles.choreNavigation}>
               <TouchableOpacity onPress={prevChore} style={styles.navButton}>
-              <Image
-              style={styles.chevronIcons}
-              source={require('../assets/images/ChevronLeft.png')}
-            />
+                <Text style={styles.navButtonText}>{'<'}</Text>
               </TouchableOpacity>
 
               <View style={styles.choreCard}>
@@ -143,10 +140,7 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
               </View>
 
               <TouchableOpacity onPress={nextChore} style={styles.navButton}>
-              <Image
-              style={styles.chevronIcons}
-              source={require('../assets/images/ChevronRight.png')}
-            />
+                <Text style={styles.navButtonText}>{'>'}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -169,7 +163,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '90%',
     flexDirection: 'row',
-    paddingHorizontal: 5, // added padding for alignment
+    paddingHorizontal: 20, // added padding for alignment
     marginBottom: 20,
   },
   h2: {
@@ -181,7 +175,7 @@ const styles = StyleSheet.create({
   notificationIcon: {
     width: 60,
     height: 60,
-    marginRight: -5, // Ensure alignment with the same margin as left text
+    marginRight: 20, // Ensure alignment with the same margin as left text
   },
   
   reportButton: {
@@ -195,34 +189,22 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 20,
 
-     // Drop shadow for iOS
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.25,
-  shadowRadius: 4,
-
-  // Drop shadow for Android
-  elevation: 5,
-
   },
   reportIcon: {
-    width: 40,
-    height: 40,
+    width: 30,
+    height: 30,
     marginRight: 10,
   },
   reportButtonText: {
     color: '#333',
-    opacity: 0.8,
     fontSize: 24, // increased font size
     fontWeight: 'bold', // bolded text
-    marginRight: 60, // align text to the center
+    marginRight: 80, // align text to the center
   },
   choreContainer: {
-    width: '90%',
+    width: '100%',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingLeft: 30,
-    paddingRight: 5,
+    padding: 20,
     backgroundColor: 'transparent', // updated background color
     borderRadius: 15,
   },
@@ -232,34 +214,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1,
-
-     
   },
-
-  chevronIcons: {
-    width: 30,
-    height: 30,
-   
-  },
-
   navButton: {
     width: 50, // increased width
     height: 50, // increased height
-    backgroundColor: '#F3F5F6',
+    backgroundColor: '#6D74C9',
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: -30, // added margin to prevent cropping
     zIndex: 10,
-
-    // Drop shadow for iOS
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.25,
-  shadowRadius: 4,
-
-  // Drop shadow for Android
-  elevation: 5,
   },
   navButtonText: {
     color: '#fff',
@@ -272,16 +236,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'flex-start',
     marginHorizontal: 20, // Add margin to separate each card
-
-     // Drop shadow for iOS
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.25,
-  shadowRadius: 4,
-
-  // Drop shadow for Android
-  elevation: 5,
-
   },
   choreName: {
     fontSize: 24,
@@ -299,15 +253,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-
-     // Drop shadow for iOS
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.25,
-  shadowRadius: 4,
-
-  // Drop shadow for Android
-  elevation: 5,
   },
   choreTextContainer: {
     flexDirection: 'column', // Stack "3 days left" and "Mop Floors" vertically
