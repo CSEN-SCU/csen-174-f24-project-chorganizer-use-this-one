@@ -25,7 +25,7 @@ function Launch({ navigation }: { navigation: any }): React.JSX.Element {
           />
           <Text style={styles.h2}>welcome to</Text>
           <Text style={styles.h1}>Choreganizer!</Text>
-          <Pressable style={styles.buttonPrimary} onPress={()=>navigation.navigate('Personal')}>
+          <Pressable style={styles.buttonPrimary} onPress={()=>navigation.navigate('Create House Name')}>
             <Text style={styles.buttonPrimaryText}>Create a home</Text>
           </Pressable>
           <Pressable style={styles.buttonSecondary} onPress={()=>navigation.navigate('Personal')}>
