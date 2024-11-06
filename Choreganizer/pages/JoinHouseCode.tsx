@@ -9,7 +9,7 @@ import {
   Pressable
 } from 'react-native';
 
-function Launch({ navigation }: { navigation: any }): React.JSX.Element {
+function JoinHouseCode({ navigation }: { navigation: any }): React.JSX.Element {
   return (
     <View style={{
         flex: 1,
@@ -19,18 +19,10 @@ function Launch({ navigation }: { navigation: any }): React.JSX.Element {
       }}>
         <ImageBackground source={require('../assets/images/backgroundBlur.png')} style={styles.background} // Set a proper style
         resizeMode="cover" >
-            <Image
-            style={styles.houseGraphic}
-            source={require('../assets/images/houseGraphic.png')}
-          />
-          <Text style={styles.h2}>welcome to</Text>
-          <Text style={styles.h1}>Choreganizer!</Text>
-          <Pressable style={styles.buttonPrimary} onPress={()=>navigation.navigate('Create House Name')}>
-            <Text style={styles.buttonPrimaryText}>Create a home</Text>
-          </Pressable>
-          <Pressable style={styles.buttonSecondary} onPress={()=>navigation.navigate('Join House Code')}>
-            <Text style={styles.buttonSecondaryText}>Join a home</Text>
-          </Pressable>
+            <Text>Create House Page</Text>
+            <Pressable style={styles.buttonSecondary} onPress={()=>navigation.navigate('Launch')}>
+                <Text style={styles.buttonSecondaryText}>DEV ROUTE: Launch Page</Text>
+            </Pressable>
         </ImageBackground>
     </View>
   );
@@ -87,4 +79,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Launch;
+export default JoinHouseCode;

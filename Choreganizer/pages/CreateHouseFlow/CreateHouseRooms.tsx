@@ -29,7 +29,7 @@ function CreateHouseRooms({navigation}: {navigation: any}): React.JSX.Element {
       }}>
       <ImageBackground
         source={require('../../assets/images/backgroundBlur.png')}
-        style={styles.background} // Set a proper style
+        style={styles.background}
         resizeMode="cover">
         <View style={styles.inputForm}>
           <Text style={styles.h2}>Create House: Room Selection</Text>
