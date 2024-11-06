@@ -21,6 +21,7 @@ import CreateHouseName from './pages/CreateHouseFlow/CreateHouseName';
 import CreateHouseMember from './pages/CreateHouseFlow/CreateHouseMember';
 import CreateHouseRooms from './pages/CreateHouseFlow/CreateHouseRooms';
 import CreateHouseDone from './pages/CreateHouseFlow/CreateHouseDone';
+import JoinHouseCode from './pages/JoinHouseCode';
 
 //page names
 const launchName = "Launch";
@@ -32,6 +33,7 @@ const createHouseName = "Create House Name";
 const createHouseMembers = "Create House Members"
 const createHouseRooms = "Create House Rooms";
 const createHouseDone = "Create House Done";
+const joinHouseCode = "Join House Code";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -57,6 +59,7 @@ function App(): React.JSX.Element {
         <Stack.Screen name={createHouseMembers} component={CreateHouseMember} options={{ headerShown: false }}/>
         <Stack.Screen name={createHouseRooms} component={CreateHouseRooms} options={{ headerShown: false }}/>
         <Stack.Screen name={createHouseDone} component={CreateHouseDone} options={{ headerShown: false }}/>
+        <Stack.Screen name={joinHouseCode} component={JoinHouseCode} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
