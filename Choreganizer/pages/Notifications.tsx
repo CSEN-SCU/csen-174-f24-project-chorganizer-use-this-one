@@ -82,25 +82,6 @@ function Notifications({navigation}: {navigation: any}): React.JSX.Element {
                   justifyContent: 'space-between',
                 }}>
                 <Text style={styles.h6}>{item.message}</Text>
-                <Pressable onPress={() => console.log('do something')}>
-                  {item.tags === 'Bump 👊' ? (
-                    <Text style={{fontSize: 22}}>✅</Text>
-                  ) : item.tags === 'Mess reported' ? (
-                    <View
-                      style={{
-                        backgroundColor: '#65558F',
-                        borderRadius: 18,
-                        paddingVertical: 5,
-                        paddingHorizontal: 10,
-                      }}>
-                      <Text style={{color: 'white'}}>Claim</Text>
-                    </View>
-                  ) : item.tags === 'Achievement' ? (
-                    <Text style={{fontSize: 22}}>🔥</Text>
-                  ) : (
-                    <Text style={{fontSize: 22}}>✅</Text>
-                  )}
-                </Pressable>
               </View>
             </View>
           )}
