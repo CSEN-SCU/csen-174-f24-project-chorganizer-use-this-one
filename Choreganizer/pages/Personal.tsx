@@ -14,31 +14,6 @@ import ExpandableList from '../assets/components/CollapsibleView';
 import { totalData } from '../assets/totalData';
 
 function Personal({navigation}: {navigation: any}): React.JSX.Element {
-  // const chores = [
-  //   {name: 'Kitchen',
-  //     tasks: [
-  //       {time: '2 days', chore: 'mop floors', status: true},
-  //       {time: '5 days', chore: 'wipe stovetop', status: false},
-  //       {time: '1 week', chore: 'clean fridge', status: true},
-  //     ],
-  //   },
-  //   {
-  //     name: 'Bathroom',
-  //     tasks: [
-  //       {time: '2 days', chore: 'mop floors', status: true},
-  //       {time: '5 days', chore: 'wipe stovetop', status: false},
-  //     ],
-  //   },
-  //   {
-  //     name: 'Living Room',
-  //     tasks: [
-  //       {time: '5 days', chore: 'wipe stovetop', status: false},
-  //       {time: '1 week', chore: 'clean fridge', status: true},
-  //     ],
-  //   },
-  // ];
-
-
   const currentUser = totalData.currentUser;
   const currentUserData = totalData.houseMates.find((mate) => {mate.name == currentUser; return mate.chores})
   const chores = currentUserData?.chores;

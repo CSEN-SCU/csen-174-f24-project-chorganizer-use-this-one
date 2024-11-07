@@ -5,12 +5,12 @@ const ExpandableListItem = ({item}) => {
   const [expanded, setExpanded] = useState(false);
   const [taskStatuses, setTaskStatuses] = useState(item.tasks.map(task => task.status));
 
-  console.log(item);
   const toggleExpand = () => {
     setExpanded(!expanded);
   };
 
   const toggleStatus = (index) => {
+    //HI BACKEND PEOPLE! here you can toggle whether or not they completed the core, the current lines underneath handle it on the front end, but if you're passing in the task status then we can just use that :)
     const updatedStatuses = [...taskStatuses];
     updatedStatuses[index] = !updatedStatuses[index];
     setTaskStatuses(updatedStatuses);
@@ -42,6 +42,7 @@ const ExpandableListItem = ({item}) => {
     </View>
   );
 };
+
 
 const ExpandableList = ({data}) => {
   const renderItem = ({item}) => <ExpandableListItem item={item} />;

@@ -139,7 +139,10 @@ function CreateHouseMember({navigation}: {navigation: any}): React.JSX.Element {
 
           <Pressable
             style={styles.buttonPrimary}
-            onPress={() => navigation.navigate('Create House Rooms')}>
+            onPress={() => {
+              //HI BACKEND PEOPLE! here's where you could maybe maybe submit the list of housemates which is called "userSignedUp"
+              navigation.navigate('Create House Rooms');
+            }}>
             <Text style={styles.buttonPrimaryText}>Continue</Text>
           </Pressable>
         </View>
