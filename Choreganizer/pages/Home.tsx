@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+
 // Define types for housemates and chores
 interface Chore {
   title: string;
@@ -87,6 +88,7 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
           {/* Hi __ Section */}
           <View style={styles.welcomeContainer}>
             <Text style={styles.h2}>Welcome Home!</Text>
+           
             <Pressable
               onPress={() => navigation.navigate('Notification')}
               accessibilityLabel="Open notifications"
