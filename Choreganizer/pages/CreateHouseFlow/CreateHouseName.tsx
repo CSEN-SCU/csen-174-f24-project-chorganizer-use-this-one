@@ -14,6 +14,7 @@ function CreateHouseName({navigation}: {navigation: any}): React.JSX.Element {
   const [houseName, onChangeHouseName] = useState('');
 
   const submitUserHouseName = () => {
+    //HI BACKEND PEOPLE! this is where you submit the house name 🫀
     console.log('submitting user info');
   };
 

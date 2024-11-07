@@ -4,38 +4,29 @@ import {
   StyleSheet,
   Text,
   View,
-  ImageBackground,
-  TextInput,
-  FlatList,
+  Image,
   Pressable,
 } from 'react-native';
 
 function CreateHouseDone({navigation}: {navigation: any}): React.JSX.Element {
-  const [currRoomAddition, onCurrRoomAddition] = useState('');
-  const [roomCreated, onRoomCreated] = useState(['']);
-
-  const addUserToInvited = () => {
-    onRoomCreated([...roomCreated, currRoomAddition]);
-    onCurrRoomAddition('');
-  };
-
   return (
     <View
       style={{
         flex: 1,
-        justifyContent: 'center',
         alignItems: 'center',
         width: '100%',
+        backgroundColor: '#6D74C9',
+        paddingTop: '20%'
       }}>
-      <ImageBackground
-        source={require('../../assets/images/backgroundBlur.png')}
-        style={styles.background} // Set a proper style
-        resizeMode="cover">
-        <View style={styles.inputForm}>
-          <Text style={styles.h2}>Create House: Done!</Text>
+      <View style={styles.background}>
+        <Pressable style={{alignSelf: 'flex-start'}} onPress={()=>navigation.navigate('LoggedIn')}><Image source={require('../../assets/images/CloseIcon.png')}/></Pressable>
+        <View>
+          <Image source={require('../../assets/images/ClipBoardGraphic.png')} />
+          <Text style={{fontWeight: 'bold', color: 'white', fontSize: 20, textAlign: 'center'}}>House Created!</Text>
+          <Text style={{fontWeight: 'bold', color: 'white', fontSize: 16, textAlign: 'center'}}>You're ready. Let’s begin be seeing what chores we have in store for you.</Text>
         </View>
-        <Pressable onPress={()=>navigation.navigate('LoggedIn')}><Text>DEV ROUTE: PERSONAL PAGE</Text></Pressable>
-      </ImageBackground>
+        <Pressable style={styles.buttonPrimary} onPress={()=>navigation.navigate('LoggedIn')}><Text style={styles.buttonPrimaryText}>Done</Text></Pressable>
+      </View>
     </View>
   );
 }
@@ -74,7 +65,7 @@ const styles = StyleSheet.create({
   },
   buttonPrimary: {
     marginTop: 40,
-    backgroundColor: '#6D74C9',
+    backgroundColor: '#eee',
     width: '80%',
     display: 'flex',
     alignItems: 'center',
@@ -83,27 +74,14 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   buttonPrimaryText: {
-    color: '#eee',
-    fontSize: 20,
-  },
-  buttonSecondary: {
-    borderBlockColor: '#6D74C9',
-    width: '80%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  buttonSecondaryText: {
     color: '#6D74C9',
     fontSize: 20,
   },
   background: {
-    flex: 1,
     alignItems: 'center',
-    width: '100%',
-    paddingTop: '20%',
+    justifyContent: 'space-between',
+    width: '75%',
+    height: '80%'
   },
 });
 
