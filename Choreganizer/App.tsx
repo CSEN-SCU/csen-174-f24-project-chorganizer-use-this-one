@@ -53,7 +53,7 @@ function NavBarStack() {
         component={Personal}
         options={{
           headerShown: false,
-          tabBarLabel: 'Home',
+          tabBarLabel: 'Personal',
           tabBarIcon: () => (
             <Image
               style={{width: 35, height: 35}}
@@ -81,7 +81,7 @@ function NavBarStack() {
         component={Notifications}
         options={{
           headerShown: false,
-          tabBarLabel: 'Home',
+          tabBarLabel: 'Notifications',
           tabBarIcon: () => (
             <Image
               style={{width: 35, height: 35}}
@@ -95,7 +95,7 @@ function NavBarStack() {
         component={Settings}
         options={{
           headerShown: false,
-          tabBarLabel: 'Home',
+          tabBarLabel: 'Settings',
           tabBarIcon: () => (
             <Image
               style={{width: 35, height: 35}}
