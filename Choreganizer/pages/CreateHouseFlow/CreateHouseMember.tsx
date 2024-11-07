@@ -98,7 +98,7 @@ function CreateHouseMember({navigation}: {navigation: any}): React.JSX.Element {
           {/* Email list section */}
           <FlatList
             data={userSignedUp}
-            renderItem={({item}) => (
+            renderItem={({item, index}) => (
               <View style={styles.userEmailed}>
                 <View
                   style={{
@@ -110,7 +110,7 @@ function CreateHouseMember({navigation}: {navigation: any}): React.JSX.Element {
                   <View
                     style={{
                       backgroundColor:
-                        userProfileColors[Math.floor(Math.random() * 5)],
+                        userProfileColors[index % userProfileColors.length],
                       borderRadius: 100,
                       width: 40,
                       height: 40,
