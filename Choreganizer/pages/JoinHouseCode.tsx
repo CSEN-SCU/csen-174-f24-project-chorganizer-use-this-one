@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, TextInput, Pressable, ImageBackground, Keyboard } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Pressable, ImageBackground, Image, Keyboard } from 'react-native';
 
 function JoinHouseCode({ navigation }: { navigation: any }): React.JSX.Element {
   const [code, setCode] = useState(['', '', '', '']);
@@ -20,6 +20,8 @@ function JoinHouseCode({ navigation }: { navigation: any }): React.JSX.Element {
     }
   };
 
+  const isCodeComplete = code.every((digit) => digit !== '');
+
   useEffect(() => {
     // Automatically focus on the first input when the component mounts
     setTimeout(() => {
@@ -35,10 +37,15 @@ function JoinHouseCode({ navigation }: { navigation: any }): React.JSX.Element {
         resizeMode="cover">
         <View style={{ width: '80%' }}>
           <View style={styles.header}>
+
             <Pressable
-              style={styles.backButton}
-              onPress={() => navigation.navigate('Launch')}>
-              <Text>◀️</Text>
+              onPress={() => navigation.navigate('Launch')}
+
+            >
+              <Image
+                style={styles.backButton}
+                source={require('../assets/images/BackButton.png')}
+              />
             </Pressable>
             <Text style={styles.h2}>Let's join your house</Text>
             <Text style={styles.h4}>We sent a code to your email</Text>
@@ -68,8 +75,10 @@ function JoinHouseCode({ navigation }: { navigation: any }): React.JSX.Element {
             </View>
 
             <Pressable
-              style={styles.buttonPrimary}
-              onPress={() => navigation.navigate('LoggedIn')}>
+              style={[styles.buttonPrimary, !isCodeComplete && styles.buttonDisabled]}
+              onPress={() => isCodeComplete && navigation.navigate('LoggedIn')}
+              disabled={!isCodeComplete}
+            >
               <Text style={styles.buttonPrimaryText}>Join House</Text>
             </Pressable>
           </View>
@@ -102,6 +111,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     alignSelf: 'flex-start',
+    marginRight: 320,
   },
   h2: {
     color: '#6D74C9',
@@ -118,34 +128,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    height: '70%',
-    gap: 20,
+    height: '50%',
+    gap: 40,
   },
   codeInputContainer: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     width: '100%',
-    gap: 15,
+    gap: 10,
   },
   codeInputBox: {
-    width: 60,
-    height: 60,
-    backgroundColor: '#EEECF0',
+    width: 70,
+    height: 90,
+    backgroundColor: '#E3DBEC',
     borderRadius: 15,
     fontSize: 48, // Font size 1.5 times the header size
+    fontWeight: 'bold',
     textAlign: 'center',
     color: '#000', // Make the number black
-    borderWidth: 1,
-    borderColor: '#D1D1D1',
+    
   },
   buttonPrimary: {
     backgroundColor: '#6D74C9',
-    width: '70%',
+    width: '90%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 10,
     borderRadius: 20,
+  },
+  buttonDisabled: {
+    backgroundColor: '#B0B0B0', // Lighter color for disabled state
   },
   buttonPrimaryText: {
     color: '#eee',
@@ -153,4 +166,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default JoinHouseCode;123
+export default JoinHouseCode;
