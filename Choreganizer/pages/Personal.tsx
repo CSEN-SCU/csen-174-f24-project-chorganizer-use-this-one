@@ -1,5 +1,4 @@
 import React from 'react';
-
 import {
   StyleSheet,
   Text,
@@ -7,117 +6,175 @@ import {
   ImageBackground,
   Pressable,
   Image,
-  ScrollView,
+  FlatList,
 } from 'react-native';
 import ExpandableList from '../assets/components/CollapsibleView';
+import {totalData} from '../assets/totalData';
 
-import { totalData } from '../assets/totalData';
-
-function Personal({navigation}: {navigation: any}): React.JSX.Element {
+function Personal({navigation}) {
   const currentUser = totalData.currentUser;
-  const currentUserData = totalData.houseMates.find((mate) => {mate.name == currentUser; return mate.chores})
+  const currentUserData = totalData.houseMates.find(
+    mate => mate.name === currentUser,
+  );
   const chores = currentUserData?.chores;
 
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100%',
-      }}>
-      <ImageBackground
-        source={require('../assets/images/backgroundBlur.png')}
-        style={styles.background} // Set a proper style
-        resizeMode="cover">
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'flex-start'}} >
-          {/* Hi __ Section */}
-          <Pressable onPress={()=>navigation.navigate('Launch')}><Text>DEV ROUTE: Load Launch</Text></Pressable>
-          <View
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              width: '90%',
-              flexDirection: 'row',
-              marginBottom: 20,
-            }}>
+  const renderItem = ({item}) => {
+    switch (item.key) {
+      case 'header':
+        return (
+          <View style={styles.headerContainer}>
             <View>
               <Text style={styles.h2}>Hi, name!</Text>
               <Text style={styles.h4}>You have x chores left</Text>
             </View>
             <Pressable onPress={() => navigation.navigate('Notification')}>
               <Image
-                style={{width: 60, height: 60}}
-                source={require('../assets/images/Inbox.png')}></Image>
+                style={styles.inboxIcon}
+                source={require('../assets/images/Inbox.png')}
+              />
             </Pressable>
           </View>
-          {/* Thumbnails */}
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              width: '90%',
-            }}>
-            <View
-              style={{
-                backgroundColor: '#F3F5F6',
-                width: '48%',
-                borderRadius: 18,
-                shadowColor: 'grey',
-                shadowOffset: {width: 1, height: 2},
-                shadowOpacity: 0.2,
-                shadowRadius: 3,
-                padding: 15,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
+        );
+      case 'thumbnails':
+        return (
+          <View style={styles.thumbnailContainer}>
+            {/* Add content for each thumbnail */}
+            <View style={styles.thumbnailBox}>
               <Image
                 style={{marginBottom: 10}}
-                source={require('../assets/images/Streak.png')}></Image>
+                source={require('../assets/images/Streak.png')}
+              />
               <Text style={styles.h6}>X day streak</Text>
             </View>
-            <View
-              style={{
-                backgroundColor: '#F3F5F6',
-                width: '48%',
-                borderRadius: 18,
-                shadowColor: 'grey',
-                shadowOffset: {width: 1, height: 2},
-                shadowOpacity: 0.2,
-                shadowRadius: 3,
-              }}>
-              <View
-                style={{
-                  height: 30,
-                  backgroundColor: '#FCEFB4',
-                  borderTopRightRadius: 18,
-                  borderTopLeftRadius: 18,
-                }}></View>
-              <View
-                style={{padding: 15, display: 'flex', justifyContent: 'center'}}>
+
+            <View style={styles.upcomingBox}>
+              <View style={styles.yellowHighlightBox}></View>
+              <View style={styles.upcomingTextSection}>
                 <Text style={styles.h6}>Upcoming</Text>
-                <Text style={styles.h8}>"You have stuff to do. Witerwally go do it. 🎩" -Abraham Lincoln</Text>
+                <Text style={styles.h8}>
+                  "You have stuff to do. Witerwally go do it. 🎩" -Abraham
+                  Lincoln
+                </Text>
               </View>
             </View>
           </View>
-          {/* Dropdown list section */}
-          <View style={{width: '90%', marginTop: 20}}>
-              <ExpandableList data={chores}></ExpandableList>
+        );
+      case 'chores':
+        return (
+          <View style={styles.expandableContainer}>
+            <ExpandableList data={chores} />
           </View>
-        </ScrollView>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <ImageBackground
+        source={require('../assets/images/backgroundBlur.png')}
+        style={styles.background}
+        resizeMode="cover">
+        <Pressable onPress={() => navigation.navigate('Launch')}>
+          <Text>DEV ROUTE: Load Launch</Text>
+        </Pressable>
+        <FlatList
+          data={[{key: 'header'}, {key: 'thumbnails'}, {key: 'chores'}]}
+          renderItem={renderItem}
+          keyExtractor={item => item.key}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.flatListContent}
+        />
       </ImageBackground>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  houseGraphic: {
-    width: 300,
-    height: 300, // Add a height here to avoid cropping
-    resizeMode: 'contain', // Use contain to keep the aspect ratio
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  background: {
+    flex: 1,
+    alignItems: 'center',
+    width: '100%',
+    paddingTop: '20%',
+  },
+  flatListContent: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  headerContainer: {
+    width: '90%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  inboxIcon: {
+    width: 60,
+    height: 60,
+  },
+  thumbnailContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '90%',
+  },
+  upcomingBox: {
+    backgroundColor: '#F3F5F6',
+    width: '48%',
+    borderRadius: 18,
+    shadowColor: 'grey',
+    shadowOffset: {width: 1, height: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  yellowHighlightBox: {
+    height: 30,
+    backgroundColor: '#FCEFB4',
+    borderTopRightRadius: 18,
+    borderTopLeftRadius: 18,
+  },
+  upcomingTextSection: {
+    padding: 15,
+    display: 'flex',
+    justifyContent: 'center',
+  },
+  thumbnailBox: {
+    backgroundColor: '#F3F5F6',
+    width: '48%',
+    borderRadius: 18,
+    padding: 15,
+    alignItems: 'center',
+    shadowColor: 'grey',
+    shadowOffset: {width: 1, height: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  highlight: {
+    height: 30,
+    backgroundColor: '#FCEFB4',
+    borderTopRightRadius: 18,
+    borderTopLeftRadius: 18,
+  },
+  thumbnailContent: {
+    padding: 15,
+    justifyContent: 'center',
+    shadowColor: 'grey',
+    shadowOffset: {width: 1, height: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  expandableContainer: {
+    width: '90%',
+    marginTop: 20,
+    shadowColor: 'grey',
+    shadowOffset: {width: 1, height: 2},
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   h8: {
     color: '#656565',
@@ -137,39 +194,6 @@ const styles = StyleSheet.create({
     color: '#6D74C9',
     fontWeight: 'bold',
     fontSize: 32,
-  },
-  buttonPrimary: {
-    marginTop: 40,
-    backgroundColor: '#6D74C9',
-    width: '80%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  buttonPrimaryText: {
-    color: '#eee',
-    fontSize: 20,
-  },
-  buttonSecondary: {
-    borderBlockColor: '#6D74C9',
-    width: '80%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  buttonSecondaryText: {
-    color: '#6D74C9',
-    fontSize: 20,
-  },
-  background: {
-    flex: 1,
-    alignItems: 'center',
-    width: '100%',
-    paddingTop: '20%',
   },
 });
 
