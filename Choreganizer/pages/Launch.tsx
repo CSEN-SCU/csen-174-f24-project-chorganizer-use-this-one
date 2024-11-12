@@ -46,7 +46,7 @@ function Launch({ navigation }: { navigation: any }): React.JSX.Element {
         ) : (
           // Buttons after sign-in
           <>
-              
+
               <Pressable style={styles.buttonPrimary} onPress={() => navigation.navigate('Create House Name')}>
                 <Text style={styles.buttonPrimaryText}>Create a home</Text>
               </Pressable>
