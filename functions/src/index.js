@@ -1,18 +1,8 @@
-// // Export functions
-// exports.createUser = auth.createUser;
-// exports.createHouse = houses.createHouse;
-// exports.addChore = chores.addChore;
-// exports.rotateChores = chores.rotateChores;
-// exports.sendNotification = notifications.sendNotification;
-// exports.uploadProof = storage.uploadProof;
-
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore} from "firebase/firestore";
-import addUser from "./auth/auth.js";
-// import { signInWithGoogle, sendJoinCode } from './auth/auth.js';
-// import { createHouse, inviteUserToHouse, joinHouse } from './houses/houses.js';
+import { signInWithGoogle } from "./auth/auth.js";
+import { createHouse, inviteUserToHouse, joinHouse } from './houses/houses.js';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -33,6 +23,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// export default app;
-addUser(auth, db);
-// signInWithGoogle(auth, db);
+createHouse(0,0,0,db);
+
+export { auth, db };

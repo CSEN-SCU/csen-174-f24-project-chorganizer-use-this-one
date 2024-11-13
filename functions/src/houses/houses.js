@@ -57,4 +57,4 @@ async function joinHouse(houseId, userId) {
     }
 }
 
-export default { createHouse, inviteUserToHouse, joinHouse };
+export { createHouse, inviteUserToHouse, joinHouse };
