@@ -1,14 +1,14 @@
 import { collection, addDoc, doc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
-async function createChore(choreId, choreName, choreDue, roomId, choreStatus, choreLate, choreUserId, choreNotifId, HomeId, db) {
+async function createRoom(roomId, roomName, choreId, db) {
     try {
-        const choreRef = doc(db, "chores", choreId.toString())
+        const roomRef = doc(db, "rooms", roomId.toString())
         // Add new house document to Firestore
-        await setDoc(choreRef, {
-            id: choreId,
-            name: choreName || "Chore",
-            dueDate: choreDueDate,
-            roomId: [null],
+        await setDoc(roomRef, {
+            id: roomId,
+            name: roomName || "Room",
+            //house: houseID
+            chores: [null],
             members: [null]
         });
         console.log("Room created successfully w/ id of ", roomId);

@@ -11,6 +11,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore} from "firebase/firestore";
 import addUser from "./auth/auth.js";
+import {createRoom, assignChoresToRoom, assignUser } from "./rooms/rooms.js";
 // import { signInWithGoogle, sendJoinCode } from './auth/auth.js';
 // import { createHouse, inviteUserToHouse, joinHouse } from './houses/houses.js';
 // TODO: Add SDKs for Firebase products that you want to use
@@ -35,4 +36,9 @@ const db = getFirestore(app);
 
 // export default app;
 addUser(auth, db);
+const roomId = "bathroom"; const roomName = "bathroom"; const choreId = 1;
+await createRoom(roomId, roomName, choreId, db);
+await assignChoresToRoom(roomId, 2, db); 
+await assignChoresToRoom(roomId, 4, db);
+process.exit();
 // signInWithGoogle(auth, db);
