@@ -8,10 +8,11 @@ import {
   ScrollView,
   Pressable,
   TouchableOpacity,
+  Modal,
+  TextInput,
 } from 'react-native';
+import { totalData } from '../assets/totalData';
 
-
-// Define types for housemates and chores
 interface Chore {
   title: string;
   daysLeft: number;
@@ -24,8 +25,9 @@ interface Housemate {
 
 function Home({ navigation }: { navigation: any }): React.JSX.Element {
   const [currentChoreIndex, setCurrentChoreIndex] = useState(0);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [reportText, setReportText] = useState('');
 
-  // Sample data for housemates and their chores
   const housemates: Housemate[] = [
     {
       name: 'Olivia',
@@ -37,20 +39,26 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
         { title: 'Bleach Toilet', daysLeft: 5 },
       ],
     },
-    { name: 'Liam', chores: [
-      { title: 'Mop Floors', daysLeft: 3 },
-      { title: 'Mop Floors', daysLeft: 1 },
-      { title: 'Mop Floors', daysLeft: 4 },
-      { title: 'Mop Floors', daysLeft: 2 },
-      { title: 'Mop Floors', daysLeft: 5 },
-    ], },
-    { name: 'Emma', chores: [
-      { title: 'Mop Floors', daysLeft: 3 },
-      { title: 'Sweep Ground', daysLeft: 1 },
-      { title: 'Sweep Ground', daysLeft: 4 },
-      { title: 'Sweep Ground', daysLeft: 2 },
-      { title: 'Sweep Ground', daysLeft: 5 },
-    ], },
+    {
+      name: 'Liam',
+      chores: [
+        { title: 'Mop Floors', daysLeft: 3 },
+        { title: 'Mop Floors', daysLeft: 1 },
+        { title: 'Mop Floors', daysLeft: 4 },
+        { title: 'Mop Floors', daysLeft: 2 },
+        { title: 'Mop Floors', daysLeft: 5 },
+      ],
+    },
+    {
+      name: 'Emma',
+      chores: [
+        { title: 'Mop Floors', daysLeft: 3 },
+        { title: 'Sweep Ground', daysLeft: 1 },
+        { title: 'Sweep Ground', daysLeft: 4 },
+        { title: 'Sweep Ground', daysLeft: 2 },
+        { title: 'Sweep Ground', daysLeft: 5 },
+      ],
+    },
   ];
 
   const nextChore = () => {
@@ -63,14 +71,29 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
     );
   };
 
+  const handleAddNotification = () => {
+    // Create a new notification object
+    const newNotification = {
+      tags: 'Mess reported',
+      message: reportText,
+      time: new Date().toLocaleTimeString(),
+    };
+
+    // Find the current user and update their notifications in totalData
+    const currentUserData = totalData.houseMates.find(
+      mate => mate.name === totalData.currentUser
+    );
+
+    if (currentUserData) {
+      if (currentUserData.notifications) {
+        currentUserData.notifications.push(newNotification);
+      }
+      setReportText(''); // Clear input after adding notification
+    }
+  };
+
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100%',
-      }}>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}>
       <ImageBackground
         source={require('../assets/images/backgroundBlur.png')}
         style={styles.background}
@@ -80,15 +103,12 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
             width: '100%',
-            display: 'flex',
             justifyContent: 'center',
             alignItems: 'flex-start',
           }}
         >
-          {/* Hi __ Section */}
           <View style={styles.welcomeContainer}>
             <Text style={styles.h2}>Welcome Home!</Text>
-           
             <Pressable
               onPress={() => navigation.navigate('Notification')}
               accessibilityLabel="Open notifications"
@@ -100,12 +120,9 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
             </Pressable>
           </View>
 
-          {/* Report a Mess Button */}
           <TouchableOpacity
             style={styles.reportButton}
-            onPress={() => {
-              navigation.navigate('ReportMess'); // Navigate to report mess screen
-            }}
+            onPress={() => setModalVisible(true)}
             accessibilityLabel="Report a mess"
           >
             <Image
@@ -115,7 +132,52 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
             <Text style={styles.reportButtonText}>Report a Mess</Text>
           </TouchableOpacity>
 
-          {/* Housemate Chores Section */}
+          {/* Report Mess Modal */}
+          <Modal
+            visible={modalVisible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContainer}>
+                <Pressable
+                  onPress={() => setModalVisible(false)}
+                  style={styles.closeButton}
+                  accessibilityLabel="Close report modal"
+                >
+                  <Text style={styles.closeButtonText}>X</Text>
+                </Pressable>
+                <View style={styles.modalHeader}>
+                <Image
+                    style={styles.reportIcon}
+                    source={require('../assets/images/ReportIcon.png')}
+                  />
+                  <Text style={styles.modalTitle}>Report a Mess</Text>
+                  
+                </View>
+                <TextInput
+                  style={styles.reportInput}
+                  multiline={true}
+                  placeholder="Describe the mess..."
+                  onChangeText={setReportText}
+                  value={reportText}
+                />
+                <TouchableOpacity
+                  style={styles.postReportButton}
+                  onPress={() => {
+                    handleAddNotification;
+                    setModalVisible(false);
+                    navigation.navigate('Notification', { newReport: reportText });
+                  }}
+                >
+                  <Text style={styles.postReportButtonText}>Post Report</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+
+         {/* Housemate Chores Section */}
           <View style={styles.choreContainer}>
             <View style={styles.choreNavigation}>
               <TouchableOpacity onPress={prevChore} style={styles.navButton}>
@@ -166,12 +228,10 @@ const styles = StyleSheet.create({
     paddingTop: '20%',
   },
   welcomeContainer: {
-    display: 'flex',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '90%',
-    flexDirection: 'row',
-    paddingHorizontal: 5, // added padding for alignment
     marginBottom: 20,
   },
   h2: {
@@ -179,15 +239,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 32,
   },
-
   notificationIcon: {
     width: 60,
     height: 60,
-    marginRight: -5, // Ensure alignment with the same margin as left text
+    marginRight: -5,
   },
-  
   reportButton: {
-    alignSelf: 'center', // Center the button horizontally
+    alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -196,16 +254,11 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     borderRadius: 10,
     marginBottom: 20,
-
-     // Drop shadow for iOS
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.25,
-  shadowRadius: 4,
-
-  // Drop shadow for Android
-  elevation: 5,
-
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   reportIcon: {
     width: 40,
@@ -215,11 +268,11 @@ const styles = StyleSheet.create({
   reportButtonText: {
     color: '#333',
     opacity: 0.8,
-    fontSize: 24, // increased font size
-    fontWeight: 'bold', // bolded text
-    marginRight: 60, // align text to the center
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginRight: 60,
   },
-  choreContainer: {
+choreContainer: {
     width: '90%',
     alignItems: 'center',
     justifyContent: 'center',
@@ -330,6 +383,58 @@ const styles = StyleSheet.create({
   fistBumpIcon: {
     fontSize: 24,
   },
-});
 
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '90%',
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  closeButton: {
+    alignSelf: 'flex-end',
+  },
+  closeButtonText: {
+    fontSize: 18,
+    color: '#999',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  reportInput: {
+    height: 150,
+    borderRadius: 10,
+    backgroundColor: '#F3F5F6',
+    padding: 10,
+    marginVertical: 15,
+    textAlignVertical: 'top',
+  },
+  postReportButton: {
+    backgroundColor: '#6D74C9',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  postReportButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+});
 export default Home;
