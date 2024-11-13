@@ -62,11 +62,11 @@ function Settings({navigation}: {navigation: any}): React.JSX.Element {
         </View>
         <View style={{width: '90%'}}>
           <Text style={styles.h4}>House Settings</Text>
-          <View style={styles.notificationItem}>
+          {/* <View style={styles.notificationItem}>
             <Pressable onPress={() => setModalVisible(!modalVisible)}>
               <Text style={styles.h6}>Join House</Text>
             </Pressable>
-          </View>
+          </View> */}
           <View style={styles.notificationItem}>
               <Text style={[styles.h6, {color: '#FF8D8D'}]}>Leave House</Text>  
           </View>

@@ -8,6 +8,7 @@ import {
   TextInput,
   FlatList,
   Pressable,
+  Image
 } from 'react-native';
 
 function CreateHouseMember({navigation}: {navigation: any}): React.JSX.Element {
@@ -54,7 +55,7 @@ function CreateHouseMember({navigation}: {navigation: any}): React.JSX.Element {
             <Pressable
               style={{alignSelf: 'flex-start', marginBottom: 20}}
               onPress={() => navigation.navigate('Create House Name')}>
-              <Text>◀️</Text>
+              <Image source={require('../../assets/images/BackButton.png')}/>
             </Pressable>
 
             {/* Header */}

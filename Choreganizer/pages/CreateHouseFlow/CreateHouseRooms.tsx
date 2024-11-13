@@ -62,7 +62,7 @@ function CreateHouseRooms({navigation}: {navigation: any}): React.JSX.Element {
               <Pressable
                 style={{alignSelf: 'flex-start', marginBottom: 20}}
                 onPress={() => navigation.navigate('Create House Name')}>
-                <Text>◀️</Text>
+                <Image source={require('../../assets/images/BackButton.png')}/>
               </Pressable>
 
               {/* Header */}
