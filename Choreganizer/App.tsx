@@ -19,6 +19,7 @@ import CreateHouseMember from './pages/CreateHouseFlow/CreateHouseMember';
 import CreateHouseRooms from './pages/CreateHouseFlow/CreateHouseRooms';
 import CreateHouseDone from './pages/CreateHouseFlow/CreateHouseDone';
 import JoinHouseCode from './pages/JoinHouseCode';
+import AuthScreen from './pages/AuthScreen';  // Import the AuthScreen
 
 //page names
 const launchName = 'Launch';
@@ -31,6 +32,7 @@ const createHouseMembers = 'Create House Members';
 const createHouseRooms = 'Create House Rooms';
 const createHouseDone = 'Create House Done';
 const joinHouseCode = 'Join House Code';
+const authName = 'Auth';  // New auth screen name
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -44,9 +46,19 @@ const screenOptions = {
 
 function NavBarStack() {
   return (
-    <Tab.Navigator tabBarOptions={{showLabel: false, showIcon: true, activeTintColor: 'red', inactiveTintColor: 'black', labelStyle: {
-      fontWeight: 'bold', fontSize: 12
-    },}} {...{screenOptions}}>
+    <Tab.Navigator
+      tabBarOptions={{
+        showLabel: false,
+        showIcon: true,
+        activeTintColor: 'red',
+        inactiveTintColor: 'black',
+        labelStyle: {
+          fontWeight: 'bold',
+          fontSize: 12,
+        },
+      }}
+      {...{ screenOptions }}
+    >
       <Tab.Screen
         name={personalName}
         component={Personal}
