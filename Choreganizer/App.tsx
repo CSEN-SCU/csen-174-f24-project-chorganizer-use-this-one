@@ -39,26 +39,28 @@ const screenOptions = {
   tabBarStyle: {
     backgroundColor: 'rgba(255,255,255, 0)',
     height: 100,
-  },
-  tabBarOptions: {
-    showIcon: true,
-  },
+  }
 };
 
 function NavBarStack() {
   return (
-    <Tab.Navigator {...{screenOptions}}>
+    <Tab.Navigator tabBarOptions={{showLabel: false, showIcon: true, activeTintColor: 'red', inactiveTintColor: 'black', labelStyle: {
+      fontWeight: 'bold', fontSize: 12
+    },}} {...{screenOptions}}>
       <Tab.Screen
         name={personalName}
         component={Personal}
         options={{
           headerShown: false,
           tabBarLabel: 'Personal',
-          tabBarIcon: () => (
+          tabBarIcon: ({focused}) => ( focused ?  
             <Image
-              style={{width: 35, height: 35}}
-              source={require('./assets/images/PersonIcon.png')}
-            />
+              style={{width: 50, height: 50}}
+              source={require('./assets/images/ActivePersonIcon.png')}
+            /> : <Image
+            style={{width: 30, height: 30}}
+            source={require('./assets/images/PersonIcon.png')}
+          />
           ),
         }}
       />
@@ -68,9 +70,12 @@ function NavBarStack() {
         options={{
           headerShown: false,
           tabBarLabel: 'Home',
-          tabBarIcon: () => (
+          tabBarIcon: ({focused}) => ( focused ? <Image
+            style={{width: 50, height: 50}}
+            source={require('./assets/images/ActiveHomeIcon.png')}
+          /> :
             <Image
-              style={{width: 35, height: 35}}
+              style={{width: 30, height: 30}}
               source={require('./assets/images/HomeIcon.png')}
             />
           ),
@@ -80,11 +85,14 @@ function NavBarStack() {
         name={notificationName}
         component={Notifications}
         options={{
-          headerShown: false,
           tabBarLabel: 'Notifications',
-          tabBarIcon: () => (
+          headerShown: false,
+          tabBarIcon: ({focused}) => ( focused ? <Image
+            style={{width: 50, height: 50}}
+            source={require('./assets/images/ActiveInboxIcon.png')}
+          />:
             <Image
-              style={{width: 35, height: 35}}
+              style={{width: 30, height: 30}}
               source={require('./assets/images/InboxIcon.png')}
             />
           ),
@@ -96,9 +104,12 @@ function NavBarStack() {
         options={{
           headerShown: false,
           tabBarLabel: 'Settings',
-          tabBarIcon: () => (
+          tabBarIcon: ({focused}) => ( focused ?  <Image
+            style={{width: 50, height: 50}}
+            source={require('./assets/images/ActiveSettingIcon.png')}
+          />:
             <Image
-              style={{width: 35, height: 35}}
+              style={{width: 30, height: 30}}
               source={require('./assets/images/SettingsIcon.png')}
             />
           ),
