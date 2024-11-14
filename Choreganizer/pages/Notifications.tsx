@@ -6,7 +6,7 @@ function Notifications({ route, navigation: _navigation }: { route: any; navigat
   const { newReport } = route.params || {}; // Retrieve new report from navigation params
   const currentUser = totalData.currentUser;
   const currentUserData = totalData.houseMates.find(mate => mate.name === currentUser);
-  
+
   // Initialize notifications, including both old and new notifications
   const [notifications, setNotifications] = useState<{ time: string; message: string; tags: string; isNew?: boolean }[]>(currentUserData?.notifications || []);
 
@@ -28,6 +28,12 @@ function Notifications({ route, navigation: _navigation }: { route: any; navigat
     setNotifications(prevNotifications => prevNotifications.filter((_, i) => i !== index));
   };
 
+  const handleNotificationPress = (item) => {
+    if (item.tags !== 'Mess reported') {
+      _navigation.navigate('Personal'); 
+    }
+  };
+
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}>
       <ImageBackground
@@ -47,32 +53,40 @@ function Notifications({ route, navigation: _navigation }: { route: any; navigat
           <FlatList
             data={notifications}
             renderItem={({ item, index }) => (
-              <View style={styles.notificationItem}>
-          <View style={styles.notificationHeader}>
-            <View style={item.tags === 'Mess reported' ? styles.messNotif : styles.reminderNotif}>
-              <Text style={{ color: '#656565' }}>{item.tags}</Text>
-            </View>
-            <Text style={styles.timeText}>{item.time}</Text>
-          </View>
-          <View style={styles.notificationContent}>
-            <Text style={styles.h6}>{item.message}</Text>
-            <Pressable onPress={() => console.log('do something')}>
-              {item.tags === 'Mess reported' ? (
-                <View style={styles.claimButton}>
+              <Pressable onPress={() => handleNotificationPress(item)}>
+                <View style={styles.notificationItem}>
+                  <View style={styles.notificationHeader}>
+                    <View style={
+                      item.tags === 'Bump 👊' ? styles.bumpNotif : 
+                      item.tags === 'Achievement' ? styles.achievementNotif : 
+                      item.tags === 'Reminder' ? styles.reminderNotif : 
+                      styles.messNotif
+                    }>
+                      <Text style={{ color: '#656565' }}>{item.tags}</Text>
+                    </View>
+                    <Text style={styles.timeText}>{item.time}</Text>
+                  </View>
+                  <View style={styles.notificationContent}>
+                    <Text style={styles.h6}>{item.message}</Text>
+                    <Pressable onPress={() => handleDeleteNotification(index)}>
+                      {item.tags === 'Mess reported' ? (
+                        <View style={styles.claimButton}>
             <Text style={{ color: 'white' }}>Claim</Text>
                 </View>
               ) : (
-                <Text style={{ fontSize: 22 }}>✅</Text>
+                <Text style={{ fontSize: 22 }}> </Text>
               )}
             </Pressable>
             {/* Show delete button only for new notifications */}
-            {item.isNew && (
+            {/*{item.isNew && (
               <TouchableOpacity onPress={() => handleDeleteNotification(index)}>
                 <Text style={styles.deleteButton}>🗑️</Text>
               </TouchableOpacity>
-            )}
+            )} 
+            */}
           </View>
               </View>
+              </Pressable>
             )}
             keyExtractor={(item, index) => index.toString()} // Ensures each item has a unique key
           />
@@ -108,18 +122,45 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     gap: 10,
   },
+  h4: {
+    color: '#5A4C9C',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
   h2: {
     color: '#6D74C9',
     fontWeight: 'bold',
     fontSize: 32,
+  },
+  h8: {
+    color: '#656565',
+    fontSize: 12,
   },
   h6: {
     color: '#656565',
     fontWeight: 'heavy',
     fontSize: 22,
   },
+  bumpNotif: {
+    backgroundColor: '#D0E1FD',
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    borderRadius: 30,
+    display: 'flex',
+    justifyContent: 'center',
+    alignSelf: 'flex-start',
+  },
   messNotif: {
     backgroundColor: '#EFC1C1',
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    borderRadius: 30,
+    display: 'flex',
+    justifyContent: 'center',
+    alignSelf: 'flex-start',
+  },
+  achievementNotif: {
+    backgroundColor: '#C1EFD8',
     paddingVertical: 5,
     paddingHorizontal: 15,
     borderRadius: 30,
@@ -136,6 +177,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'flex-start',
   },
+
   notificationHeader: {
     display: 'flex',
     justifyContent: 'space-between',
