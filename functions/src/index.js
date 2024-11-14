@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore} from "firebase/firestore";
 import { signInWithGoogle } from "./auth/auth.js";
-import { createHouse, inviteUserToHouse, joinHouse } from './houses/houses.js';
+import { createHouse, inviteUserToHouse, verifyInvite } from './houses/houses.js';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -23,6 +23,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-createHouse(0,0,0,db);
+createHouse("house!!!", 15);
 
-export { auth, db };
+export { auth, db, signInWithGoogle, createHouse, inviteUserToHouse, verifyInvite};

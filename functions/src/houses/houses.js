@@ -1,10 +1,10 @@
-import { collection, addDoc, doc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { collection, addDoc, getDoc, doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { db } from "../index.js";
 
-async function createHouse(houseId, houseName, userId, db) {
+async function createHouse(houseName, userId) {
     try {
         // Add new house document to Firestore
-        await addDoc(collection(db, "houses"), {
-            id: houseId,
+        const docRef = await addDoc(collection(db, "houses"), {
             name: houseName || "House",
             owner: userId,
             members: [userId],
@@ -12,7 +12,9 @@ async function createHouse(houseId, houseName, userId, db) {
             invitationCodes: [null],
             rooms: [null]
         });
+        await updateDoc(docRef, {id: docRef.id});
         console.log("Home created successfully");
+        return ((await getDoc(docRef)).data());
         
     } catch (error) {
         console.error("Error creating house:", error);
@@ -38,7 +40,7 @@ async function inviteUserToHouse(invitedEmails, ownerId) {
     }
 }
 
-async function joinHouse(houseId, userId) {
+async function verifyInvite(houseId, userId) {
     try {
         // Update house document to add the user to the members array
         const houseRef = doc(db, "houses", houseId);
@@ -57,4 +59,4 @@ async function joinHouse(houseId, userId) {
     }
 }
 
-export { createHouse, inviteUserToHouse, joinHouse };
+export { createHouse, inviteUserToHouse, verifyInvite };

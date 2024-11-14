@@ -1,0 +1,19 @@
+current directory: /Users/beatricehackman/Desktop/csen-174-f24-project-chorganizer-use-this-one/Choreganizer/vendor/bundle/ruby/3.2.0/gems/nkf-0.2.0/ext/nkf
+/Users/beatricehackman/.rbenv/versions/3.2.2/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/beatricehackman/Desktop/csen-174-f24-project-chorganizer-use-this-one/Choreganizer/vendor/bundle/ruby/3.2.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20241016-64889-me9yf7 sitelibdir\=./.gem.20241016-64889-me9yf7 clean
+
+current directory: /Users/beatricehackman/Desktop/csen-174-f24-project-chorganizer-use-this-one/Choreganizer/vendor/bundle/ruby/3.2.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20241016-64889-me9yf7 sitelibdir\=./.gem.20241016-64889-me9yf7
+compiling nkf.c
+linking shared-object nkf.bundle
+ld: warning: ignoring duplicate libraries: '-lruby.3.2'
+
+current directory: /Users/beatricehackman/Desktop/csen-174-f24-project-chorganizer-use-this-one/Choreganizer/vendor/bundle/ruby/3.2.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20241016-64889-me9yf7 sitelibdir\=./.gem.20241016-64889-me9yf7 install
+/usr/bin/install -c -m 0755 nkf.bundle ./.gem.20241016-64889-me9yf7
+
+current directory: /Users/beatricehackman/Desktop/csen-174-f24-project-chorganizer-use-this-one/Choreganizer/vendor/bundle/ruby/3.2.0/gems/nkf-0.2.0/ext/nkf
+make DESTDIR\= sitearchdir\=./.gem.20241016-64889-me9yf7 sitelibdir\=./.gem.20241016-64889-me9yf7 clean
