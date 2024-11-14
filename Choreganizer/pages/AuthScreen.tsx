@@ -1,6 +1,6 @@
 // AuthScreen.tsx
 import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, View, Pressable, Alert } from 'react-native';
+import { StyleSheet, Text, TextInput, View, Pressable, Alert, ImageBackground } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 function AuthScreen(): React.JSX.Element {
@@ -31,7 +31,11 @@ function AuthScreen(): React.JSX.Element {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{isSigningUp ? 'Create Account' : 'Welcome'}</Text>
+      <ImageBackground
+        source={require('../assets/images/backgroundBlur.png')}
+        style={styles.background}
+        resizeMode="cover">
+          <Text style={styles.h2}>{isSigningUp ? 'Create Account' : 'Welcome'}</Text>
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -54,20 +58,20 @@ function AuthScreen(): React.JSX.Element {
       {/* Conditionally render sign-in or sign-up buttons */}
       {!isSigningUp ? (
         <>
-          <Pressable style={styles.button} onPress={handleSignIn}>
-            <Text style={styles.buttonText}>Sign In</Text>
+          <Pressable style={styles.buttonPrimary} onPress={handleSignIn}>
+            <Text style={styles.buttonPrimaryText}>Sign In</Text>
           </Pressable>
           <Pressable
-            style={[styles.button, styles.signUpButton]}
+            style={styles.buttonSecondary}
             onPress={() => setIsSigningUp(true)}
           >
-            <Text style={styles.buttonText}>Sign Up</Text>
+            <Text style={styles.buttonSecondaryText}>Sign Up</Text>
           </Pressable>
         </>
       ) : (
         <>
-          <Pressable style={[styles.button, styles.signUpButton]} onPress={handleSignUp}>
-            <Text style={styles.buttonText}>Create Account</Text>
+          <Pressable style={styles.buttonPrimary} onPress={handleSignUp}>
+            <Text style={styles.buttonPrimaryText}>Create Account</Text>
           </Pressable>
           <Pressable
             style={styles.linkButton}
@@ -77,11 +81,18 @@ function AuthScreen(): React.JSX.Element {
           </Pressable>
         </>
       )}
+      </ImageBackground>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%'
+  },
   container: {
     flex: 1,
     alignItems: 'center',
@@ -95,13 +106,13 @@ const styles = StyleSheet.create({
     color: '#6D74C9',
   },
   input: {
-    width: '80%',
-    padding: 15,
-    borderRadius: 8,
-    backgroundColor: '#ffffff',
+    fontSize: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'lightgrey',
+    color: '#656565',
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    padding: 10,
+    width: '80%',
   },
   button: {
     width: '80%',
@@ -126,6 +137,39 @@ const styles = StyleSheet.create({
     color: '#6D74C9',
     fontSize: 14,
     textDecorationLine: 'underline',
+  },
+  buttonPrimary:{
+    marginTop: 20,
+    backgroundColor: '#6D74C9',
+    width: '80%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 20 
+  },
+  buttonPrimaryText:{
+    color: '#eee',
+    fontSize: 20
+  },
+  buttonSecondary:{
+    borderBlockColor: '#6D74C9',
+    width: '80%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 20 
+  },
+  buttonSecondaryText:{
+    color: '#6D74C9',
+    fontSize: 20
+  },
+  h2: {
+    color: '#6D74C9',
+    fontWeight: 'bold',
+    fontSize: 28,
+    marginBottom: 10
   },
 });
 
