@@ -24,20 +24,19 @@ function Notifications({ route, navigation: _navigation }: { route: any; navigat
   // Initialize notifications, including both old and new notifications
  const [notifications, setNotifications] = useState<{ time: string; message: string; tags: string; isNew?: boolean }[]>(currentUserData?.notifications || []);
 
-  useEffect(() => {
-    // Add the new report as a notification if it exists
-    if (newReport) {
-      const newNotification = {
-        tags: 'Mess reported',
-        message: newReport,
-        time: new Date().toLocaleTimeString(),
+ useEffect(() => {
+  if (newReport) {
+    const newNotification = {
+      tags: 'Mess reported',
+      message: newReport,
+      time: new Date().toLocaleTimeString(),
+      isNew: true,
+    };
+    // Prepend the new notification to the existing list to ensure it appears at the top
+    setNotifications(prevNotifications => [newNotification, ...prevNotifications]);
+  }
+}, [newReport]);
 
-        isNew: true, // Mark this notification as new
-      };
-      // Append the new notification to the existing ones
-      setNotifications(prevNotifications => [newNotification, ...prevNotifications]);
-    }
-  }, [newReport]);
 
   const handleDeleteNotification = (index: number) => {
     setNotifications(prevNotifications => prevNotifications.filter((_, i) => i !== index));
