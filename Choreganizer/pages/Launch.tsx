@@ -10,14 +10,7 @@ import {
 } from 'react-native';
 
 function Launch({ navigation }: { navigation: any }): React.JSX.Element {
-  // State to track if user is signed in
-  const [isSignedIn, setIsSignedIn] = useState(false);
-
-  // Simulate the Google sign-in process (in the real app, connect to backend)
-  const handleGoogleSignIn = () => {
-    // For now, we simulate the sign-in process by updating the state
-    setIsSignedIn(true);
-  };
+ 
 
   return (
     <View style={{
@@ -34,27 +27,15 @@ function Launch({ navigation }: { navigation: any }): React.JSX.Element {
           />
           <Text style={styles.h2}>welcome to</Text>
           <Text style={styles.h1}>Choreganizer!</Text>
-          {/* Conditionally render sign-in button or home buttons */}
-        {!isSignedIn ? (
-          // Google Sign-in Image as a Button
-          <Pressable onPress={handleGoogleSignIn}>
-            <Image
-              source={require('../assets/images/GoogleSignInButton.png')}
-              style={styles.googleSignInImage}
-            />
-          </Pressable>
-        ) : (
-          // Buttons after sign-in
-          <>
+          
 
-              <Pressable style={styles.buttonPrimary} onPress={() => navigation.navigate('Create House Name')}>
+          <Pressable style={styles.buttonPrimary} onPress={() => navigation.navigate('Create House Name')}>
                 <Text style={styles.buttonPrimaryText}>Create a home</Text>
               </Pressable>
               <Pressable style={styles.buttonSecondary} onPress={() => navigation.navigate('Join House Code')}>
                 <Text style={styles.buttonSecondaryText}>Join a home</Text>
               </Pressable>
-          </>
-        )}
+         
         </ImageBackground>
     </View>
   );
@@ -82,12 +63,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 32
   },
-  googleSignInImage: {
-    width: 300,  // Adjust the width as needed
-    height: 50,  // Adjust the height as needed (make sure to match the aspect ratio of the image)
-    resizeMode: 'contain',  // Ensures the image keeps its aspect ratio
-    marginTop: 40,  // Add spacing if needed
-  },
+ 
   buttonPrimary:{
     marginTop: 40,
     backgroundColor: '#6D74C9',
