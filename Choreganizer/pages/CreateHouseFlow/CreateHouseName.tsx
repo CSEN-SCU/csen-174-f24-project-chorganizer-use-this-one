@@ -14,7 +14,6 @@ import {
 import {
   getAuth,
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
 } from 'firebase/auth';
 import {initializeApp} from 'firebase/app';
 const firebaseConfig = {

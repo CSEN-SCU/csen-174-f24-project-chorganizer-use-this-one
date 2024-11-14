@@ -20,8 +20,6 @@ const firebaseConfig = {
   measurementId: "G-C5P42ZVWEE"
 };
 const app = initializeApp(firebaseConfig);
-const provider = new GoogleAuthProvider();
-const auth = getAuth(app);
 
 function Launch({ navigation }: { navigation: any }): React.JSX.Element {
  
