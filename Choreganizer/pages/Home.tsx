@@ -166,7 +166,7 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
                 <TouchableOpacity
                   style={styles.postReportButton}
                   onPress={() => {
-                    handleAddNotification;
+                    handleAddNotification();
                     setModalVisible(false);
                     navigation.navigate('Notification', { newReport: reportText });
                   }}
