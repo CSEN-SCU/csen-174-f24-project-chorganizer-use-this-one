@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 function AuthScreen(): React.JSX.Element {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSigningUp, setIsSigningUp] = useState(false); // New state for toggling mode
   const navigation = useNavigation();
 
   const handleSignIn = () => {
@@ -30,7 +31,7 @@ function AuthScreen(): React.JSX.Element {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome</Text>
+      <Text style={styles.title}>{isSigningUp ? 'Create Account' : 'Welcome'}</Text>
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -49,12 +50,33 @@ function AuthScreen(): React.JSX.Element {
         autoCapitalize="none"
         textContentType="password"
       />
-      <Pressable style={styles.button} onPress={handleSignIn}>
-        <Text style={styles.buttonText}>Sign In</Text>
-      </Pressable>
-      <Pressable style={[styles.button, styles.signUpButton]} onPress={handleSignUp}>
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </Pressable>
+      
+      {/* Conditionally render sign-in or sign-up buttons */}
+      {!isSigningUp ? (
+        <>
+          <Pressable style={styles.button} onPress={handleSignIn}>
+            <Text style={styles.buttonText}>Sign In</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.button, styles.signUpButton]}
+            onPress={() => setIsSigningUp(true)}
+          >
+            <Text style={styles.buttonText}>Sign Up</Text>
+          </Pressable>
+        </>
+      ) : (
+        <>
+          <Pressable style={[styles.button, styles.signUpButton]} onPress={handleSignUp}>
+            <Text style={styles.buttonText}>Create Account</Text>
+          </Pressable>
+          <Pressable
+            style={styles.linkButton}
+            onPress={() => setIsSigningUp(false)}
+          >
+            <Text style={styles.linkText}>Already have an account? Sign In</Text>
+          </Pressable>
+        </>
+      )}
     </View>
   );
 }
@@ -96,6 +118,14 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  linkButton: {
+    marginTop: 10,
+  },
+  linkText: {
+    color: '#6D74C9',
+    fontSize: 14,
+    textDecorationLine: 'underline',
   },
 });
 
