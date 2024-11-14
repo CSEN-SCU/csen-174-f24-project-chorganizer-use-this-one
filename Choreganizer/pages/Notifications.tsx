@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ImageBackground, FlatList, Pressable, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ImageBackground, FlatList, Pressable, ScrollView } from 'react-native';
 import { totalData } from '../assets/totalData';
 
 function Notifications({ route, navigation: _navigation }: { route: any; navigation: any }): React.JSX.Element {
@@ -7,8 +7,22 @@ function Notifications({ route, navigation: _navigation }: { route: any; navigat
   const currentUser = totalData.currentUser;
   const currentUserData = totalData.houseMates.find(mate => mate.name === currentUser);
 
+    //Commented out my attempt to get the format of the time to be more readable
+
+  // const fakeNotifications = [
+  //   { tags: 'Achievement', message: '10 day streak!', time: new Date(new Date().getTime() - 1 * 60 * 1000).toISOString() },
+  //   { tags: 'Mess reported', message: 'Spill in the kitchen', time: new Date(new Date().getTime() - 10 * 60 * 1000).toISOString() },
+  //   { tags: 'Bump 👊', message: 'Mop floors', time: new Date(new Date().getTime() - 3 * 60 * 60 * 1000).toISOString() },
+  //   { tags: 'Reminder', message: 'Bleach towels', time: new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000).toISOString() },
+  //   { tags: 'Reminder', message: 'Buy detergent', time: new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000).toISOString() },
+  // ];
+
+  // const [notifications, setNotifications] = useState(
+  //   currentUserData?.notifications || fakeNotifications
+  // );
+
   // Initialize notifications, including both old and new notifications
-  const [notifications, setNotifications] = useState<{ time: string; message: string; tags: string; isNew?: boolean }[]>(currentUserData?.notifications || []);
+ const [notifications, setNotifications] = useState<{ time: string; message: string; tags: string; isNew?: boolean }[]>(currentUserData?.notifications || []);
 
   useEffect(() => {
     // Add the new report as a notification if it exists
@@ -17,6 +31,7 @@ function Notifications({ route, navigation: _navigation }: { route: any; navigat
         tags: 'Mess reported',
         message: newReport,
         time: new Date().toLocaleTimeString(),
+
         isNew: true, // Mark this notification as new
       };
       // Append the new notification to the existing ones
@@ -28,11 +43,35 @@ function Notifications({ route, navigation: _navigation }: { route: any; navigat
     setNotifications(prevNotifications => prevNotifications.filter((_, i) => i !== index));
   };
 
-  const handleNotificationPress = (item) => {
+  const handleNotificationPress = (item: { tags: string; message: string; time: string; isNew?: boolean }) => {
     if (item.tags !== 'Mess reported') {
       _navigation.navigate('Personal'); 
     }
   };
+
+  //Commented out my attempt to get the format of the time to be more readable
+  // function getRelativeTime(timestamp: string) {
+  //   const now = new Date();
+  //   const postedDate = new Date(timestamp);
+  //   const diff = Math.floor((now.getTime() - postedDate.getTime()) / 1000); // Difference in seconds
+  
+  //   if (diff < 60) {
+  //     return "Now";
+  //   } else if (diff < 3600) {
+  //     const minutes = Math.floor(diff / 60);
+  //     return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+  //   } else if (diff < 86400) {
+  //     const hours = Math.floor(diff / 3600);
+  //     return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+  //   } else {
+  //     const days = Math.floor(diff / 86400);
+  //     return `${days} day${days !== 1 ? 's' : ''} ago`;
+  //   }
+
+    
+  // }
+  
+  
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}>
@@ -43,6 +82,7 @@ function Notifications({ route, navigation: _navigation }: { route: any; navigat
       >
         <View style={styles.header}>
           <Text style={styles.h2}>Notification Center</Text>
+         
          {/*} <Pressable onPress={() => navigation.navigate('Notification')}>
             <Image style={{ width: 60, height: 60 }} source={require('../assets/images/Inbox.png')} />
           </Pressable>*/}
@@ -65,6 +105,7 @@ function Notifications({ route, navigation: _navigation }: { route: any; navigat
                       <Text style={{ color: '#656565' }}>{item.tags}</Text>
                     </View>
                     <Text style={styles.timeText}>{item.time}</Text>
+                    {/* <Text style={styles.timeText}>{getRelativeTime(item.time)}</Text> */}
                   </View>
                   <View style={styles.notificationContent}>
                     <Text style={styles.h6}>{item.message}</Text>
