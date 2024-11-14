@@ -8,19 +8,6 @@ import {
   Image,
   Pressable
 } from 'react-native';
-import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
-import { initializeApp } from "firebase/app";
-const firebaseConfig = {
-  apiKey: "AIzaSyDsqE8t5QnzfcQuSU2D2BKVGGOlIuj84Tk",
-  authDomain: "chorganizer-29aa5.firebaseapp.com",
-  projectId: "chorganizer-29aa5",
-  storageBucket: "chorganizer-29aa5.appspot.com",
-  messagingSenderId: "983388578449",
-  appId: "1:983388578449:web:c3e858e05b17e81245d530",
-  measurementId: "G-C5P42ZVWEE"
-};
-const app = initializeApp(firebaseConfig);
-
 function Launch({ navigation }: { navigation: any }): React.JSX.Element {
  
   return (
