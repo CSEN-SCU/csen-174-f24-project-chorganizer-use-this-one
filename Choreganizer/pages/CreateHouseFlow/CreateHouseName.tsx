@@ -11,6 +11,10 @@ import {
   Image,
 } from 'react-native';
 
+import {createHouse} from '../../functions/src/index.js';
+
+createHouse("test1", 4);
+
 function CreateHouseName({navigation}: {navigation: any}): React.JSX.Element {
   const [houseName, onChangeHouseName] = useState('');
 
