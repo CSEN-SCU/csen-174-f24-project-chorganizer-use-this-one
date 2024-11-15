@@ -11,12 +11,44 @@ import {
   Image,
 } from 'react-native';
 
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from 'firebase/auth';
+import {initializeApp} from 'firebase/app';
+const firebaseConfig = {
+  apiKey: 'AIzaSyDsqE8t5QnzfcQuSU2D2BKVGGOlIuj84Tk',
+  authDomain: 'chorganizer-29aa5.firebaseapp.com',
+  projectId: 'chorganizer-29aa5',
+  storageBucket: 'chorganizer-29aa5.appspot.com',
+  messagingSenderId: '983388578449',
+  appId: '1:983388578449:web:c3e858e05b17e81245d530',
+  measurementId: 'G-C5P42ZVWEE',
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 function CreateHouseName({navigation}: {navigation: any}): React.JSX.Element {
   const [houseName, onChangeHouseName] = useState('');
-
+  const handleNewUserSignUp = (email: string, password: string) => {
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(userCredential => {
+        // Signed up
+        const user = userCredential.user;
+        console.log('user sign up succeeded', user);
+        // ...
+      })
+      .catch(error => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(errorCode, errorMessage);
+        // ..
+      });
+  };
   const submitUserHouseName = () => {
     //HI BACKEND PEOPLE! this is where you submit the house name 🫀
     console.log('submitting user info');
+    handleNewUserSignUp(houseName, 'password');
   };
 
   return (
@@ -33,12 +65,20 @@ function CreateHouseName({navigation}: {navigation: any}): React.JSX.Element {
         resizeMode="cover">
         <View style={{width: '80%'}}>
           {/* Back button and header */}
-          <View style={{width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 40, gap: 20}}>
+          <View
+            style={{
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              paddingTop: 40,
+              gap: 20,
+            }}>
             {/* Back button */}
             <Pressable
               style={{alignSelf: 'flex-start'}}
               onPress={() => navigation.navigate('Launch')}>
-              <Image source={require('../../assets/images/BackButton.png')}/>
+              <Image source={require('../../assets/images/BackButton.png')} />
             </Pressable>
 
             {/* Header */}
@@ -49,14 +89,15 @@ function CreateHouseName({navigation}: {navigation: any}): React.JSX.Element {
           <View style={styles.inputForm}>
             <TextInput
               style={styles.nameInput}
-              placeholder="Enter house name"
+              placeholder=""
               onChangeText={onChangeHouseName}
               onSubmitEditing={submitUserHouseName}
               value={houseName}
+              multiline={false}
             />
             <Pressable
               style={styles.buttonPrimary}
-              onPress={() => navigation.navigate('Create House Members')}>
+              onPress={() => {submitUserHouseName(); navigation.navigate('Create House Members')}}>
               <Text style={styles.buttonPrimaryText}>
                 {houseName.length > 0 ? 'Continue' : 'Skip'}
               </Text>
@@ -75,7 +116,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
     height: '70%',
-    gap: 10
+    gap: 10,
   },
   nameInput: {
     fontSize: 24,
