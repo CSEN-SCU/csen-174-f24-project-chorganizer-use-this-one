@@ -8,10 +8,8 @@ import {
   Image,
   Pressable
 } from 'react-native';
-
 function Launch({ navigation }: { navigation: any }): React.JSX.Element {
  
-
   return (
     <View style={{
         flex: 1,

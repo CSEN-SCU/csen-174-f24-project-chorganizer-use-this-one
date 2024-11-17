@@ -19,7 +19,7 @@ import CreateHouseMember from './pages/CreateHouseFlow/CreateHouseMember';
 import CreateHouseRooms from './pages/CreateHouseFlow/CreateHouseRooms';
 import CreateHouseDone from './pages/CreateHouseFlow/CreateHouseDone';
 import JoinHouseCode from './pages/JoinHouseCode';
-import AuthScreen from './pages/AuthScreen'; 
+import AuthScreen from './pages/AuthScreen';  // Import the AuthScreen
 
 // Page names
 const launchName = 'Launch';
@@ -32,7 +32,7 @@ const createHouseMembers = 'Create House Members';
 const createHouseRooms = 'Create House Rooms';
 const createHouseDone = 'Create House Done';
 const joinHouseCode = 'Join House Code';
-const authName = 'Auth';
+const authName = 'Auth';  // New auth screen name
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
