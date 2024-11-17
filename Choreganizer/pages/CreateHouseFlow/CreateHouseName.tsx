@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword} from "firebase/auth";
+import {createHouse} from "../../firebase/houses/houses.js";
+//Choreganizer/firebase/houses/houses.js
 import { initializeApp } from "firebase/app";
 const firebaseConfig = {
   apiKey: "AIzaSyDsqE8t5QnzfcQuSU2D2BKVGGOlIuj84Tk",
@@ -24,7 +26,22 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
+const userId = 4; const houseName = "theMoon";
+createHouse(houseName,userId);
+
 function CreateHouseName({navigation}: {navigation: any}): React.JSX.Element {
+  const [houseName, onChangeHouseName] = useState('');
+  console.log("test????");
+
+  const submitUserHouseName = () => {
+    console.log("inputted housename is ", houseName);
+    //HI BACKEND PEOPLE! this is where you submit the house name 🫀
+    console.log('submitting user info');
+    const userId = 4;
+    createHouse(houseName,userId);
+  };
+/*function CreateHouseName({navigation}: {navigation: any}): React.JSX.Element {
   const [houseName, onChangeHouseName] = useState('');
     const handleNewUserSignUp = (email : string, password : string) => {
       createUserWithEmailAndPassword(auth, email, password).then((userCredential) => {
@@ -39,12 +56,16 @@ function CreateHouseName({navigation}: {navigation: any}): React.JSX.Element {
         console.log(errorCode, errorMessage);
         // ..
       });
-    };
-  const submitUserHouseName = () => {
+    };*/
+  /*const submitUserHouseName = () => {
     //HI BACKEND PEOPLE! this is where you submit the house name 🫀
+    const userId = 4;
+    createHouse(houseName,userId);
+    //console.log("")
     console.log('submitting user info');
     handleNewUserSignUp(houseName, "password");
-  };
+
+  };*/
 
   return (
     <View
