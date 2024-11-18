@@ -10,6 +10,8 @@ import {
   Pressable,
   Image
 } from 'react-native';
+import { inviteUserToHouse } from '../../firebase/firebaseConfig';
+import { house } from './CreateHouseName';
 
 function CreateHouseMember({navigation}: {navigation: any}): React.JSX.Element {
   const [currUserAddition, onCurrUserAddition] = useState('');
@@ -141,7 +143,7 @@ function CreateHouseMember({navigation}: {navigation: any}): React.JSX.Element {
           <Pressable
             style={styles.buttonPrimary}
             onPress={() => {
-              //HI BACKEND PEOPLE! here's where you could maybe maybe submit the list of housemates which is called "userSignedUp"
+              inviteUserToHouse(house.id, userSignedUp); //HI BACKEND PEOPLE! here's where you could maybe maybe submit the list of housemates which is called "userSignedUp"
               navigation.navigate('Create House Rooms');
             }}>
             <Text style={styles.buttonPrimaryText}>Continue</Text>
