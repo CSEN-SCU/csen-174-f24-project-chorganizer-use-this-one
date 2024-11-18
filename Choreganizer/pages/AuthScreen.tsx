@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, View, Pressable, Alert, ImageBackground } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { SignInUser, SignUpNewUser } from '../firebase/firebaseConfig';
 
 function AuthScreen(): React.JSX.Element {
   const [email, setEmail] = useState('');
@@ -12,7 +13,7 @@ function AuthScreen(): React.JSX.Element {
   const handleSignIn = () => {
     // Add authentication logic here for signing in (e.g., Firebase, API call)
     if (email && password) {
-      // Simulate successful login
+      SignInUser(email, password);
       navigation.navigate('Launch' as never);
     } else {
       Alert.alert('Error', 'Please enter a valid email and password');
@@ -22,7 +23,7 @@ function AuthScreen(): React.JSX.Element {
   const handleSignUp = () => {
     // Add authentication logic here for signing up (e.g., Firebase, API call)
     if (email && password) {
-      // Simulate successful signup
+      SignUpNewUser(email, password);
       navigation.navigate('Launch' as never);
     } else {
       Alert.alert('Error', 'Please enter a valid email and password');
