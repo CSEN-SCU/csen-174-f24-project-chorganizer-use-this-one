@@ -11,7 +11,9 @@ import {
   Modal,
   TextInput,
 } from 'react-native';
-import { totalData } from '../assets/totalData';
+import { reportMess } from '../firebase/report-mess/reportMess';
+import {auth} from '../firebase/firebaseConfig';
+import { addMessNotification } from '../firebase/notifs/notifications.ts';
 
 interface Chore {
   title: string;
@@ -71,25 +73,13 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
     );
   };
 
-  const handleAddNotification = () => {
-    // Create a new notification object
-    const newNotification = {
-      tags: 'Mess reported',
-      message: reportText,
-      time: new Date().toLocaleTimeString(),
-    };
-
-    // Find the current user and update their notifications in totalData
-    const currentUserData = totalData.houseMates.find(
-      mate => mate.name === totalData.currentUser
-    );
-
-    if (currentUserData) {
-      if (currentUserData.notifications) {
-        currentUserData.notifications.push(newNotification);
-      }
-      setReportText(''); // Clear input after adding notification
-    }
+  const handleAddMessReport = (reportText: string) => {
+    // Report a Mess
+    const user_id = auth.currentUser!.uid
+    reportMess(user_id, reportText).then((mess_id) => {
+        addMessNotification(user_id, mess_id, reportText);
+    })
+    setReportText(''); // Clear input after reporting mess
   };
 
   return (
@@ -166,7 +156,7 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
                 <TouchableOpacity
                   style={styles.postReportButton}
                   onPress={() => {
-                    handleAddNotification();
+                    handleAddMessReport(reportText);
                     setModalVisible(false);
                     navigation.navigate('Notification', { newReport: reportText });
                   }}
