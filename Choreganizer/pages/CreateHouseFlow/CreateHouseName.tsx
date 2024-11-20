@@ -11,13 +11,14 @@ import {
   Image,
 } from 'react-native';
 
-import { createHouse } from '../../firebase/firebaseConfig.js';
+import { createHouse } from '../../firebase/firebaseConfig';
 
 let house: any;
 
 function CreateHouseName({navigation}: {navigation: any}): React.JSX.Element {
   const [houseName, onChangeHouseName] = useState('');
   const submitUserHouseName = () => {
+    console.log("house name was: ", houseName);
     house = createHouse(houseName);
     console.log('submitting house info');
   };

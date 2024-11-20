@@ -1,5 +1,5 @@
 import { collection, addDoc, doc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
-import { auth, db } from "../index.js";
+import {auth, db} from "./../firebaseConfig";
 
 async function createChore(choreName, choreDue, houseId, roomId, choreStatus, choreUserId, choreNotifId) {
     try {
@@ -9,7 +9,7 @@ async function createChore(choreName, choreDue, houseId, roomId, choreStatus, ch
             house: houseId,
             roomId: null,
             choreStatus: choreStatus || false,
-            choreUser: choreUserId,
+            choreUser: choreUserId || null,
             choreNotifId: [choreNotifId]
         });
         console.log("Chore created successfully w/ id of ", choreRef.id);

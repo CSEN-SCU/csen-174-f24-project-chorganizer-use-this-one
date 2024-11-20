@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from "firebase/auth";
 import { getFirestore} from "firebase/firestore";
-import { SignUpNewUser, SignInUser, toggleNotifs, getUserInfo } from "./users/users.js";
+import { SignUpNewUser, SignInUser, toggleNotifs, getUserInfo } from "./users/users";
 import { createHouse, inviteUserToHouse, verifyInvite, getHousemates } from './houses/houses.js';
 import { createChore, assignChorestoUsers, checkDueDate, updateStatus } from './chores/chores.js';
 

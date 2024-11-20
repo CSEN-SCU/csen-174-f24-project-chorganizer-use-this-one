@@ -13,6 +13,7 @@ function AuthScreen(): React.JSX.Element {
   const handleSignIn = () => {
     // Add authentication logic here for signing in (e.g., Firebase, API call)
     if (email && password) {
+      console.log("email is: ", email, "password is: ", password);
       SignInUser(email, password);
       navigation.navigate('Launch' as never);
     } else {

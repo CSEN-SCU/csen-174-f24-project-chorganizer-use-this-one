@@ -1,14 +1,15 @@
 import { collection, addDoc, getDoc, doc, updateDoc, arrayUnion } from "firebase/firestore";
-import { auth, db } from "../index.js";
-import nodemailer from 'nodemailer';
+//import { auth, db } from "./index.js";
+import {auth, db} from "./../firebaseConfig";
+//import nodemailer from 'nodemailer';
 
 async function createHouse(houseName) {
     try {
         const user = auth.currentUser;
         const docRef = await addDoc(collection(db, "houses"), {
             name: houseName || "House",
-            head_user: user.uid,
-            members: [user.uid],
+            head_user: user.uid || null,
+            members: [user.uid] || null,
             invitations: [null],
             invitationCodes: [null],
             rooms: [null]
@@ -61,7 +62,7 @@ async function inviteUserToHouse(houseId, invitedEmails) {
                 invitations: arrayUnion(item),
                 invitationCodes: arrayUnion(joinCode)
             });
-            await sendInvitationEmail(item, joinCode);
+            //await sendInvitationEmail(item, joinCode);
         }
     } catch (error) {
         console.error("Error inviting user to house:", error);

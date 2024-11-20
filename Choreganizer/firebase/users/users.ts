@@ -1,5 +1,5 @@
 import { auth, db } from '../firebaseConfig';
-import { collection, doc, setDoc, getDoc, query, where } from "firebase/firestore";
+import { collection, doc, setDoc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
 export const SignUpNewUser = (email : string, password : string) => {
@@ -7,7 +7,7 @@ export const SignUpNewUser = (email : string, password : string) => {
     const user = userCredential.user;
     console.log("user sign up succeeded", user);
     const docRef = doc(db, "users", user.uid);
-    await setDoc(collection(db, "users", user.uid), {
+    await setDoc(docRef, {
       name: user.displayName,
       head_user: false,
       house_id: null,
@@ -32,7 +32,7 @@ export const SignInUser = (email : string, password : string) => {
     console.log("user sign in succeeded", user);
     const usersRef = collection(db, "users");
     const q = query(usersRef, where("id", "==", user.uid));
-    const querySnapshot = await getDoc(q);
+    const querySnapshot = await getDocs(q);
 
     if (!querySnapshot.empty) {
       const existingUserData = querySnapshot.docs[0].data();
