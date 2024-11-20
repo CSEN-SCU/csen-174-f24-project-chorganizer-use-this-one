@@ -11,6 +11,8 @@ import {
   ScrollView,
 } from 'react-native';
 
+import { createChore } from '../../firebase/firebaseConfig';
+
 function CreateHouseRooms({navigation}: {navigation: any}): React.JSX.Element {
   const [rooms, setRooms] = useState([{roomName: '', chores: ['']}]);
 
@@ -40,10 +42,12 @@ function CreateHouseRooms({navigation}: {navigation: any}): React.JSX.Element {
             chores: room.chores.map((chore, cIndex) =>
               cIndex === choreIndex ? text : chore,
             ),
+            
           }
         : room,
     );
     setRooms(updatedRooms);
+    createChore(text, null, null, roomIndex, null, null, null);
   };
 
   return (
@@ -91,6 +95,7 @@ function CreateHouseRooms({navigation}: {navigation: any}): React.JSX.Element {
                       onChangeText={text =>
                         handleChoreChange(text, roomIndex, choreIndex)
                       }
+                      
                     />
                   </View>
                 ))}

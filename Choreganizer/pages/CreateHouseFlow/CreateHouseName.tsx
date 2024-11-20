@@ -11,7 +11,7 @@ import {
   Image,
 } from 'react-native';
 
-import { createHouse } from '../../firebase/firebaseConfig.ts';
+import { createHouse } from '../../firebase/firebaseConfig.js';
 
 let house: any;
 

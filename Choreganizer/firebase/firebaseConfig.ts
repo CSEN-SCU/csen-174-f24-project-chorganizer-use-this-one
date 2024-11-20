@@ -1,8 +1,9 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from "firebase/auth";
 import { getFirestore} from "firebase/firestore";
-import { SignUpNewUser, SignInUser, toggleNotifs, getUserInfo } from "./users/users.ts";
+import { SignUpNewUser, SignInUser, toggleNotifs, getUserInfo } from "./users/users.js";
 import { createHouse, inviteUserToHouse, verifyInvite, getHousemates } from './houses/houses.js';
+import { createChore, assignChorestoUsers, checkDueDate, updateStatus } from './chores/chores.js';
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -24,4 +25,4 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-export { app, auth, db, SignUpNewUser, SignInUser, getUserInfo, createHouse, inviteUserToHouse, verifyInvite, getHousemates, toggleNotifs };
+export { app, auth, db, SignUpNewUser, SignInUser, getUserInfo, createHouse, inviteUserToHouse, verifyInvite, getHousemates, toggleNotifs, createChore, assignChorestoUsers, checkDueDate, updateStatus };
