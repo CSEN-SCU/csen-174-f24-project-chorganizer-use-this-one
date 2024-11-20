@@ -10,8 +10,10 @@ import {
 } from 'react-native';
 import ExpandableList from '../assets/components/CollapsibleView';
 import {totalData} from '../assets/totalData';
+import { getUserInfo } from '../firebase/firebaseConfig';
 
 function Personal({navigation}) {
+  const userInfo = getUserInfo();  // HI FRONTEND! you could do userInfo.name or .streaks, notifs and chores are from eerina and arrans branch
   const currentUser = totalData.currentUser;
   const currentUserData = totalData.houseMates.find(
     mate => mate.name === currentUser,

@@ -11,11 +11,15 @@ import {
   Image,
 } from 'react-native';
 
+import { createHouse } from '../../firebase/firebaseConfig.ts';
+
+let house: any;
+
 function CreateHouseName({navigation}: {navigation: any}): React.JSX.Element {
   const [houseName, onChangeHouseName] = useState('');
   const submitUserHouseName = () => {
-    //HI BACKEND PEOPLE! this is where you submit the house name 🫀
-    console.log('submitting user info');
+    house = createHouse(houseName);
+    console.log('submitting house info');
   };
 
   return (
@@ -147,5 +151,7 @@ const styles = StyleSheet.create({
     paddingTop: '20%',
   },
 });
+
+export { house };
 
 export default CreateHouseName;
