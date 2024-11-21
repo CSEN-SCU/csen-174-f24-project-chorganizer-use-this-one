@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 
 import { createChore } from '../../firebase/firebaseConfig';
+import { createRoom, assignChorestoRooms } from '../../firebase/firebaseConfig';
 
 function CreateHouseRooms({navigation}: {navigation: any}): React.JSX.Element {
   const [rooms, setRooms] = useState([{roomName: '', chores: ['']}]);
@@ -19,6 +20,37 @@ function CreateHouseRooms({navigation}: {navigation: any}): React.JSX.Element {
   const addRoom = () => {
     setRooms([...rooms, {roomName: '', chores: ['']}]);
   };
+
+
+
+
+  const submitRoomInfo = async (bigArray) =>{
+    console.log("big array is this: ", bigArray);
+
+    const processRoom = async (roomName: string) => {
+      console.log("Processing room:", roomName);
+      
+      await createRoom(roomName);
+
+      const roomsStep = bigArray.find(room => room.roomName === roomName);
+      const choresInRoom = roomsStep.chores;
+      for (const chore of choresInRoom) {
+        await createChore(chore, null, null, roomName, null, null, null);
+      }
+      if (roomsStep && roomsStep.chores) {
+        const choreArray = roomsStep.chores;
+        assignChorestoRooms(roomName, choreArray);
+      } else {
+        console.log(`Room "${roomName}" or its chores not found`);
+      }
+    };
+    for (const room of bigArray) {
+      await processRoom(room.roomName);  // Await the processRoom function to ensure order
+    }
+    //bigArray.forEach(room => processRoom(room.roomName)); 
+  }
+
+
 
   const addChore = roomIndex => {
     const updatedRooms = rooms.map((room, index) =>
@@ -47,7 +79,7 @@ function CreateHouseRooms({navigation}: {navigation: any}): React.JSX.Element {
         : room,
     );
     setRooms(updatedRooms);
-    createChore(text, null, null, roomIndex, null, null, null);
+    //createChore(text, null, null, roomIndex, null, null, null);
   };
 
   return (
@@ -117,8 +149,10 @@ function CreateHouseRooms({navigation}: {navigation: any}): React.JSX.Element {
           <Pressable
             style={styles.buttonPrimary}
             onPress={() => {
+              
               //HI BACKEND PEOPLE! PUT HERE THE SUBMISSION OF THE "rooms" ARRAY, JUST RIGHT ABOVE THE NAVIGATION LINE
               //YOU'RE KILLING IT! -beatrice & madi
+              submitRoomInfo(rooms),
               navigation.navigate('Create House Done');
             }}>
             <Text style={styles.buttonPrimaryText}>Confirm</Text>

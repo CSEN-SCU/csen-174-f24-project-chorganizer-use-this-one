@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from "firebase/auth";
 import { getFirestore} from "firebase/firestore";
 import { SignUpNewUser, SignInUser, toggleNotifs, getUserInfo } from "./users/users";
+import { createRoom, assignChorestoRooms, assignUser } from "./rooms/rooms.js";
 import { createHouse, inviteUserToHouse, verifyInvite, getHousemates } from './houses/houses.js';
 import { createChore, assignChorestoUsers, checkDueDate, updateStatus } from './chores/chores.js';
 
@@ -25,4 +26,4 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-export { app, auth, db, SignUpNewUser, SignInUser, getUserInfo, createHouse, inviteUserToHouse, verifyInvite, getHousemates, toggleNotifs, createChore, assignChorestoUsers, checkDueDate, updateStatus };
+export { app, auth, db, SignUpNewUser, SignInUser, getUserInfo, createHouse, inviteUserToHouse, verifyInvite, getHousemates, toggleNotifs, createChore, assignChorestoUsers, checkDueDate, updateStatus, createRoom, assignChorestoRooms, assignUser };

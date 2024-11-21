@@ -1,4 +1,4 @@
-import { collection, addDoc, doc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { collection, addDoc, doc, setDoc, query, where, getDocs, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
 import {auth, db} from "./../firebaseConfig";
 
 async function createChore(choreName, choreDue, houseId, roomId, choreStatus, choreUserId, choreNotifId) {
@@ -7,7 +7,7 @@ async function createChore(choreName, choreDue, houseId, roomId, choreStatus, ch
             name: choreName,
             dueDate: choreDue || new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
             house: houseId,
-            roomId: null,
+            roomId: roomId || null,
             choreStatus: choreStatus || false,
             choreUser: choreUserId || null,
             choreNotifId: [choreNotifId]
@@ -15,11 +15,7 @@ async function createChore(choreName, choreDue, houseId, roomId, choreStatus, ch
         console.log("Chore created successfully w/ id of ", choreRef.id);
         await updateDoc(choreRef, { id: choreRef.id });
 
-        await updateDoc(doc(db, "users", assignedUser), {
-            choreAssigned: arrayUnion(choreId), // Add choreId to the user's list of chores
-        });
-
-        return ((await getDoc(choreRef) ).data())
+        //return ((await getDoc(choreRef) ).data())
     } catch (error) {
         console.error("Error creating chore! error: ", error);
     }

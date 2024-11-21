@@ -1,78 +1,91 @@
-import { collection, addDoc, doc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { collection, addDoc, doc, setDoc, query, where, getDocs, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import {auth, db} from "./../firebaseConfig";
 
-async function createChore(choreName, choreDue, houseId, roomId, choreStatus, choreUserId, choreNotifId, db) {
+async function createRoom(roomName) {
     try {
-        //const choreRef = doc(db, "chores", choreId.toString())
-        // Add new house document to Firestore
-        const choreRef = await addDoc(collection(db, "chores"), {
-            name: choreName,
-            dueDate: choreDue || new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
-            house: houseId,
-            roomId: null,
-            choreStatus: choreStatus || false,
-            choreUser: choreUserId,
-            choreNotifId: [choreNotifId]
-            //chores: [null]
+        //const roomRef = doc(db, "rooms", roomId.toString())
+        const roomRef = await addDoc(collection(db, "rooms"), {
+            name: roomName,
+            chores: [null],
+            house: null,
         });
-        console.log("Chore created successfully w/ id of ", choreRef.id);
-        await updateDoc(choreRef, { id: choreRef.id });
-        return ((await getDoc(choreRef) ).data())
+        console.log("room created successfully w/ id of ", roomRef.id);
+        await updateDoc(roomRef, { id: roomRef.id });
+        //return ((await getDoc(roomRef) ).data())
+        
     } catch (error) {
-        console.error("Error creating chore! error: ", error);
-    }
-}
-async function assignChorestoUsers(choreId, userId, db){
-    try {
-        const userRef = doc(db, "users", userId.toString());
-        const choreRef = doc(db, "chores", choreId.choreId);
-        const choreCheck = await getDoc(choreRef);
-        const choreData = choreCheck.data();
-
-        const userCheck = await getDoc(userRef);
-        const userData = userCheck.data();
-        const numUsers = userData.userId.length();
-        const numChores = choreData.cho
-        await updateDoc(choreRef, {
-            assignedUser: userId
-        });   
-        await updateDoc(userRef, {
-            assignedChore : arrayUnion(choreId )
-        });
-        console.log("chore (with id of: ", choreId, ") was successfully assigned to user (with id of: ", userId);
-    } catch (error) {
-        console.error("Error assigning chore to user! error: ", error);
+        console.error("Error creating room! error: ", error);
     }
 }
 
-async function checkDueDate(choreId, db){
+async function assignChorestoRooms(roomName, choreArray){
     try {
-        const choreRef = doc(db, "chores", choreId.choreId);
-        const choreCheck = await getDoc(choreRef);
-        const choreData = choreCheck.data();
-        const currDate = new Date();
+        const roomRef = collection(db, "rooms");
+        const choreRef = collection(db, "chores");
 
-        if((choreData.dueDate && choreData.dueDate.toDate() <= currDate) || choreData.choreStatus == false){
-            return (false); // either chore is due now, or over due, return false (status == bad)
-        } else {
-            return (true);
+        const choreCheck = await getDocs(choreRef);
+        
+        const roomQuery = query(roomRef, where("name", "==", roomName));
+        const roomSnapshot = await getDocs(roomQuery);
+        const roomDoc = roomSnapshot.docs[0];
+
+        const choreDocs = [];
+
+        for (let choreName of choreArray) {
+            const choreQuery = query(choreRef, where("name", "==", choreName));
+            const choreSnapshot = await getDocs(choreQuery);
+            if (!choreSnapshot.empty) {
+                choreDocs.push(choreSnapshot.docs[0].id);  // Push the ID of the chore document (or use the whole doc if needed)
+            } else {
+                console.log(`Chore "${choreName}" not found`);
+            }
         }
+
+        if (choreDocs.length > 0) {
+            const roomDocRef = doc(db, "rooms", roomDoc.id); // Get the document reference for the room
+            await updateDoc(roomDocRef, {
+                chores: choreDocs  // Assign the chore IDs (or references) to the room
+            });
+            console.log("Chores assigned successfully to the room: ", roomName);
+        } else {
+            console.log("No valid chores to assign");
+        }
+
+        
     } catch (error) {
-        console.error("Error assigning chore to user! error: ", error);
-        return false;
+        console.error("Error assigning chore to room! error: ", error);
     }
 }
 
-async function bumpChore(choreId, choreUserId, db){
-    //unknown!! need Eerina's notif backend stuff still!
+async function assignChoresToRoom(roomId, choreId, db) {
+    try {
+        const roomRef = doc(db, "rooms", roomId.toString());
+        await updateDoc(roomRef, {
+            chores: arrayUnion(choreId)
+        });   
+        console.log("chore (with id of: ", choreId, ") was successfully added into room (with id of: ", roomId);
+    } catch (error) {
+        console.error("Error adding chore to room! error: ", error);
+    }
 }
 
-async function updateStatus(choreId, db){
-    const choreRef = doc(db, "chores", choreId.choreId);
-    const choreCheck = await getDoc(choreRef);
-    const choreData = choreCheck.data();
-    await updateDoc(choreRef, {
-        choreStatus: !(choreData.choreStatus)
-    });
+async function assignUser(roomId, userId, db) {
+    try {
+        // Update house document to add the user to the members array
+        const roomRef = doc(db, "room", roomId);
+        await updateDoc(roomRef, {
+            members: arrayUnion(userId)
+        });
+
+        // Update the user profile with the house ID
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, { room_id: roomId });
+
+        console.log("User added to house");
+
+    } catch (error) {
+        console.error("Error joining house:", error);
+    }
 }
 
-export { createChore, assignChorestoUsers, checkDueDate, updateStatus };
+export { createRoom, assignChorestoRooms, assignUser };
