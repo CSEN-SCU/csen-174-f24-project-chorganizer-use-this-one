@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,15 +10,36 @@ import {
 } from 'react-native';
 import ExpandableList from '../assets/components/CollapsibleView';
 import {totalData} from '../assets/totalData';
-import { getUserInfo } from '../firebase/firebaseConfig';
+import { getUserInfo, getXUsersChoreData, auth } from '../firebase/firebaseConfig';
 
-function Personal({navigation}) {
-  const userInfo = getUserInfo();  // HI FRONTEND! you could do userInfo.name or .streaks, notifs and chores are from eerina and arrans branch
-  const currentUser = totalData.currentUser;
-  const currentUserData = totalData.houseMates.find(
+function Personal ({navigation}) {
+  
+  const userInfo = auth.currentUser?.uid;          //getUserInfo();  // HI FRONTEND! you could do userInfo.name or .streaks, notifs and chores are from eerina and arrans branch
+
+  //const currentUser = totalData.currentUser;     beatrice dummy data stuff
+  //const currentUser = totalData.currentUser;
+  /*const currentUserData = totalData.houseMates.find(
     mate => mate.name === currentUser,
-  );
-  const chores = currentUserData?.chores;
+  );*/
+  //const chores = currentUserData?.chores;
+
+
+  //using beatrice's front end style, chores[] should have room name + tasks (where tasks is due date, choreName, status)
+  const [numChores, setNumChores] = useState(0);
+  const [currentUserChoreNames, setCurrentUserChoreNames] = useState<string[]>([]);
+  useEffect(() => {
+    getXUsersChoreData(userInfo)
+      .then((currentUserChoreNames) => {
+        setCurrentUserChoreNames(currentUserChoreNames);
+        const numChores = currentUserChoreNames.length;
+        console.log("Number of chores (this is in Personal.tsx):", numChores);
+        setNumChores(numChores); // Update state with the number of chores
+      })
+      .catch((error) => {
+        console.error("Error fetching chore data:", error);
+      });
+  }, [userInfo]);
+
 
   const renderItem = ({item}) => {
     switch (item.key) {
@@ -27,7 +48,7 @@ function Personal({navigation}) {
           <View style={styles.headerContainer}>
             <View>
               <Text style={styles.h2}>Hi, name!</Text>
-              <Text style={styles.h4}>You have x chores left</Text>
+              <Text style={styles.h4}>You have {numChores} chores left</Text>
             </View>
             <Pressable onPress={() => navigation.navigate('Notification')}>
               <Image
@@ -64,7 +85,7 @@ function Personal({navigation}) {
       case 'chores':
         return (
           <View style={styles.expandableContainer}>
-            <ExpandableList data={chores} />
+            <ExpandableList data={currentUserChoreNames} />
           </View>
         );
       default:

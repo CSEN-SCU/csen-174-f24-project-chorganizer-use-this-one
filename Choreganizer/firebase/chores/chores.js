@@ -81,13 +81,40 @@ async function bumpChore(choreId, choreUserId, db){
     //unknown!! need Eerina's notif backend stuff still!
 }
 
-async function updateStatus(choreId, db){
-    const choreRef = doc(db, "chores", choreId.choreId);
+async function updateStatus(choreName, db){
+    const choreRef = collection(db, "chores");
+    const choreQuery = query(choreRef, where("name", "==", choreName));
+    const choreSnapshot = await getDocs(choreQuery);
+    const choreDoc = choreSnapshot.docs[0];
+    //await updateDoc(choreRef, {
+    //    choreStatus: !(choreData.choreStatus)
+    //});
+
+    const choreDocRef = doc(db, "rooms", choreDoc.id); // Get the document reference for the room
+    await updateDoc(choreDocRef, {
+        choreStatus: !(choreData.choreStatus)  
+    });
+    console.log("chore: ", choreName, " was toggled!!");
+    
+    /*const choreRef = doc(db, "chores", choreId.choreId);
     const choreCheck = await getDoc(choreRef);
     const choreData = choreCheck.data();
     await updateDoc(choreRef, {
         choreStatus: !(choreData.choreStatus)
-    });
+    });*/
 }
 
-export { createChore, assignChorestoUsers, checkDueDate, updateStatus };
+async function getXUsersChoreData(userId){
+
+    const choreRef = collection(db, "chores");
+    const choreQuery = query(choreRef, where("choreUser", "==", userId));
+    const choreSnapshot = await getDocs(choreQuery);
+    //const justChoreNamesArray = choreSnapshot.data();
+    //const justNames = justChoreNamesArray.name;
+    const justChoreNamesArray = choreSnapshot.docs.map(doc => doc.data().name);
+    console.log("X user's chores r these: ", justChoreNamesArray);
+    return (justChoreNamesArray);
+
+}
+
+export { createChore, assignChorestoUsers, checkDueDate, updateStatus, getXUsersChoreData };
