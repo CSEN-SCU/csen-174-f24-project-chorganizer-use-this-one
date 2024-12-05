@@ -21,13 +21,17 @@ async function createChore(choreName, choreDue, houseId, roomId, choreStatus, ch
     }
 }
 
-async function assignChorestoUsers(db){
+async function assignChorestoUsers(houseId){
     try {
+        
         const userRef = collection(db, "users");
-        const choreRef = collection(db, "chores");
+        const choreRef = collection(db, "chores"); 
 
-        const choreCheck = await getDocs(choreRef);
-        const userCheck = await getDocs(userRef);
+        choreQuery = query(choreRef, where("house", "==", houseId));
+        userQuery = query(userRef, where("house_id", "==", houseId));
+
+        const choreCheck = await getDocs(choreQuery);
+        const userCheck = await getDocs(userQuery);
 
         const userIds = userCheck.docs.map((userDoc) => userDoc.id);
         const numUsers = userIds.length;
@@ -106,15 +110,22 @@ async function updateStatus(choreName, db){
 
 async function getXUsersChoreData(userId){
 
+   
+
+    const userRef = collection(db, "users");//, user.uid);
+    userQuery = query(userRef, where("uid", "==", userId));
+    const userCheck = await getDocs(userQuery);
+    const correct = userCheck.docs[0].id;
+
     const choreRef = collection(db, "chores");
-    const choreQuery = query(choreRef, where("choreUser", "==", userId));
+    const choreQuery = query(choreRef, where("choreUser", "==", correct));
     const choreSnapshot = await getDocs(choreQuery);
     //const justChoreNamesArray = choreSnapshot.data();
     //const justNames = justChoreNamesArray.name;
     const justChoreNamesArray = choreSnapshot.docs.map(doc => doc.data().name);
-    console.log("X user's chores r these: ", justChoreNamesArray);
+    
+    console.log(correct, " user's chores r these: ", justChoreNamesArray);
     return (justChoreNamesArray);
-
 }
 
 export { createChore, assignChorestoUsers, checkDueDate, updateStatus, getXUsersChoreData };

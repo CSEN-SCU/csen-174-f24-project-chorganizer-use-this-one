@@ -12,7 +12,8 @@ import {
 } from 'react-native';
 
 import { createChore } from '../../firebase/firebaseConfig';
-import { createRoom, assignChorestoRooms } from '../../firebase/firebaseConfig';
+import {house} from './CreateHouseName'
+import { createRoom, assignChorestoRooms, assignChorestoUsers } from '../../firebase/firebaseConfig';
 
 function CreateHouseRooms({navigation}: {navigation: any}): React.JSX.Element {
   const [rooms, setRooms] = useState([{roomName: '', chores: ['']}]);
@@ -20,9 +21,6 @@ function CreateHouseRooms({navigation}: {navigation: any}): React.JSX.Element {
   const addRoom = () => {
     setRooms([...rooms, {roomName: '', chores: ['']}]);
   };
-
-
-
 
   const submitRoomInfo = async (bigArray) =>{
     console.log("big array is this: ", bigArray);
@@ -35,7 +33,7 @@ function CreateHouseRooms({navigation}: {navigation: any}): React.JSX.Element {
       const roomsStep = bigArray.find(room => room.roomName === roomName);
       const choresInRoom = roomsStep.chores;
       for (const chore of choresInRoom) {
-        await createChore(chore, null, null, roomName, null, null, null);
+        await createChore(chore, null, house.id, roomName, null, null, null);
       }
       if (roomsStep && roomsStep.chores) {
         const choreArray = roomsStep.chores;
@@ -44,11 +42,19 @@ function CreateHouseRooms({navigation}: {navigation: any}): React.JSX.Element {
         console.log(`Room "${roomName}" or its chores not found`);
       }
     };
+
     for (const room of bigArray) {
       await processRoom(room.roomName);  // Await the processRoom function to ensure order
     }
     //bigArray.forEach(room => processRoom(room.roomName)); 
   }
+
+
+  //const assignChores = async () =>{
+  //  console.log("assinging chores to the users ");
+  //  await assignChorestoUsers(house.id);
+
+  //}
 
 
 
@@ -152,7 +158,8 @@ function CreateHouseRooms({navigation}: {navigation: any}): React.JSX.Element {
               
               //HI BACKEND PEOPLE! PUT HERE THE SUBMISSION OF THE "rooms" ARRAY, JUST RIGHT ABOVE THE NAVIGATION LINE
               //YOU'RE KILLING IT! -beatrice & madi
-              submitRoomInfo(rooms),
+              submitRoomInfo(rooms);
+              //assignChores();
               navigation.navigate('Create House Done');
             }}>
             <Text style={styles.buttonPrimaryText}>Confirm</Text>

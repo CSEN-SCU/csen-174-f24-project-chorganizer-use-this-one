@@ -29,9 +29,8 @@ async function assignChorestoRooms(roomName, choreArray){
         const roomSnapshot = await getDocs(roomQuery);
         const roomDoc = roomSnapshot.docs[0];
 
-        const choreDocs = [];
-
-        for (let choreName of choreArray) {
+        //const choreDocs = [];
+        /*for (let choreName of choreArray) {
             const choreQuery = query(choreRef, where("name", "==", choreName));
             const choreSnapshot = await getDocs(choreQuery);
             if (!choreSnapshot.empty) {
@@ -39,7 +38,20 @@ async function assignChorestoRooms(roomName, choreArray){
             } else {
                 console.log(`Chore "${choreName}" not found`);
             }
-        }
+        }*/
+        const chorePromises = choreArray.map(async (choreName) => {
+            const choreQuery = query(choreRef, where("name", "==", choreName));
+            const choreSnapshot = await getDocs(choreQuery);
+            if (!choreSnapshot.empty) {
+                return choreSnapshot.docs[0].id; // Return the ID of the chore
+            } else {
+                console.log(`Chore "${choreName}" not found`);
+                return null; // Return null for missing chores
+            }
+        });
+
+        const choreDocs = (await Promise.all(chorePromises)).filter(Boolean);
+
 
         if (choreDocs.length > 0) {
             const roomDocRef = doc(db, "rooms", roomDoc.id); // Get the document reference for the room
@@ -50,8 +62,6 @@ async function assignChorestoRooms(roomName, choreArray){
         } else {
             console.log("No valid chores to assign");
         }
-
-        
     } catch (error) {
         console.error("Error assigning chore to room! error: ", error);
     }

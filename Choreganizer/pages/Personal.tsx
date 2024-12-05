@@ -15,20 +15,33 @@ import { getUserInfo, getXUsersChoreData, auth } from '../firebase/firebaseConfi
 function Personal ({navigation}) {
   
   const userInfo = auth.currentUser?.uid;          //getUserInfo();  // HI FRONTEND! you could do userInfo.name or .streaks, notifs and chores are from eerina and arrans branch
-
-  //const currentUser = totalData.currentUser;     beatrice dummy data stuff
-  //const currentUser = totalData.currentUser;
-  /*const currentUserData = totalData.houseMates.find(
-    mate => mate.name === currentUser,
-  );*/
-  //const chores = currentUserData?.chores;
-
-
-  //using beatrice's front end style, chores[] should have room name + tasks (where tasks is due date, choreName, status)
+  const userName = auth.currentUser?.displayName;
   const [numChores, setNumChores] = useState(0);
   const [currentUserChoreNames, setCurrentUserChoreNames] = useState<string[]>([]);
   useEffect(() => {
-    getXUsersChoreData(userInfo)
+    if (!userInfo) return; 
+
+    console.log("Fetching chores for user:", userInfo);
+    const fetchChores = async () => {
+      try {
+        const chores = await getXUsersChoreData(userInfo); 
+        setCurrentUserChoreNames(chores);
+        setNumChores(chores.length); 
+        console.log("Chores fetched successfully:", chores);
+      } catch (error) {
+        console.error("Error fetching chore data:", error);
+      }
+    };
+    fetchChores(); 
+  }, [userInfo]);
+
+
+
+
+  /*useEffect(() => {
+    console.log("round 2 in Personal.tsx), this is the userInfo being passed: ", userInfo);
+    const currentUserChoreNames = getXUsersChoreData(userInfo)
+    
       .then((currentUserChoreNames) => {
         setCurrentUserChoreNames(currentUserChoreNames);
         const numChores = currentUserChoreNames.length;
@@ -38,7 +51,7 @@ function Personal ({navigation}) {
       .catch((error) => {
         console.error("Error fetching chore data:", error);
       });
-  }, [userInfo]);
+  }, [userInfo]);*/
 
 
   const renderItem = ({item}) => {
@@ -47,7 +60,7 @@ function Personal ({navigation}) {
         return (
           <View style={styles.headerContainer}>
             <View>
-              <Text style={styles.h2}>Hi, name!</Text>
+              <Text style={styles.h2}>Hi, {userName}!</Text>
               <Text style={styles.h4}>You have {numChores} chores left</Text>
             </View>
             <Pressable onPress={() => navigation.navigate('Notification')}>
@@ -83,9 +96,10 @@ function Personal ({navigation}) {
           </View>
         );
       case 'chores':
+        const choreData = currentUserChoreNames.map(chore => ({ data: chore }));
         return (
           <View style={styles.expandableContainer}>
-            <ExpandableList data={currentUserChoreNames} />
+            <ExpandableList data={choreData} />
           </View>
         );
       default:
