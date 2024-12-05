@@ -47,17 +47,21 @@ const screenOptions = {
 function NavBarStack() {
   return (
     <Tab.Navigator
-      tabBarOptions={{
-        showLabel: false,
-        showIcon: true,
-        activeTintColor: 'red',
-        inactiveTintColor: 'black',
-        labelStyle: {
-          fontWeight: 'bold',
-          fontSize: 12,
+      screenOptions = {{
+        "tabBarShowLabel": false,
+        "tabBarLabelStyle": {
+          "fontWeight": "bold",
+          "fontSize": 12
         },
+        "tabBarStyle": [
+          {
+            "backgroundColor": 'rgba(255,255,255, 0)',
+            "height": 100,
+            "display": "flex"
+          },
+          null
+        ]
       }}
-      {...{ screenOptions }}
     >
       <Tab.Screen
         name={personalName}

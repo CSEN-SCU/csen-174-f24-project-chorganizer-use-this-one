@@ -19,6 +19,8 @@ function CreateHouseMember({navigation}: {navigation: any}): React.JSX.Element {
   const [currUserAddition, onCurrUserAddition] = useState('');
   const [userSignedUp, onUserSignUp] = useState([]);
 
+  console.log("hello", house);
+
   const userProfileColors = [
     '#FFE3E3',
     '#FBF0E2',
@@ -146,7 +148,7 @@ function CreateHouseMember({navigation}: {navigation: any}): React.JSX.Element {
           <Pressable
             style={styles.buttonPrimary}
             onPress={() => {
-              console.log("hello", house.id);
+              console.log("hello", house);
               inviteUserToHouse(house.id, userSignedUp); //HI BACKEND PEOPLE! here's where you could maybe maybe submit the list of housemates which is called "userSignedUp"
               navigation.navigate('Create House Rooms');
             }}>

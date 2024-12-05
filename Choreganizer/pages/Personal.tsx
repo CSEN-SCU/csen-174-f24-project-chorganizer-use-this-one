@@ -14,7 +14,13 @@ import { getUserInfo, getXUsersChoreData, auth } from '../firebase/firebaseConfi
 
 function Personal ({navigation}) {
   
-  const userInfo = auth.currentUser?.uid;          //getUserInfo();  // HI FRONTEND! you could do userInfo.name or .streaks, notifs and chores are from eerina and arrans branch
+  const userInfo = auth.currentUser?.uid; 
+  //console.log("1", userInfo); 
+  const userName = auth.currentUser?.displayName;  
+  
+  //getUserInfo();  
+  
+  // HI FRONTEND! you could do userInfo.name or .streaks, notifs and chores are from eerina and arrans branch
 
   //const currentUser = totalData.currentUser;     beatrice dummy data stuff
   //const currentUser = totalData.currentUser;
@@ -47,7 +53,7 @@ function Personal ({navigation}) {
         return (
           <View style={styles.headerContainer}>
             <View>
-              <Text style={styles.h2}>Hi, name!</Text>
+              <Text style={styles.h2}>Hi, {userName}!</Text>
               <Text style={styles.h4}>You have {numChores} chores left</Text>
             </View>
             <Pressable onPress={() => navigation.navigate('Notification')}>

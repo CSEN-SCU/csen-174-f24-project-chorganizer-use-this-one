@@ -11,8 +11,37 @@ import {
   ScrollView,
 } from 'react-native';
 
+import { createRoom, assignChorestoRooms } from '../../firebase/firebaseConfig';
+
 function CreateHouseRooms({navigation}: {navigation: any}): React.JSX.Element {
   const [rooms, setRooms] = useState([{roomName: '', chores: ['']}]);
+
+  const handleSaveRoomsToFirebase = async () => {
+    console.log("0");
+    try {
+        console.log("1")
+        for (const room of rooms) {
+          console.log("2", room);
+            if (room.roomName.trim() === "") {
+                console.log("Room name cannot be empty");
+                continue; 
+            }
+
+            console.log(`Creating room: ${room.roomName}`);
+            await createRoom(room.roomName);
+
+            if (room.chores.length > 0 && room.chores[0] !== "") {
+                console.log(`Assigning chores to room: ${room.roomName}`);
+                await assignChorestoRooms(room.roomName, room.chores);
+            }
+        }
+
+        console.log("Rooms and chores saved successfully!");
+    } catch (error) {
+        console.error("Error saving rooms to Firebase:", error);
+    }
+};
+
 
   const addRoom = () => {
     setRooms([...rooms, {roomName: '', chores: ['']}]);
@@ -114,6 +143,7 @@ function CreateHouseRooms({navigation}: {navigation: any}): React.JSX.Element {
             onPress={() => {
               //HI BACKEND PEOPLE! PUT HERE THE SUBMISSION OF THE "rooms" ARRAY, JUST RIGHT ABOVE THE NAVIGATION LINE
               //YOU'RE KILLING IT! -beatrice & madi
+              handleSaveRoomsToFirebase();
               navigation.navigate('Create House Done');
             }}>
             <Text style={styles.buttonPrimaryText}>Confirm</Text>

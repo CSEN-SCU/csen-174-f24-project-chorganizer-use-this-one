@@ -13,6 +13,7 @@ import {
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile
 } from 'firebase/auth';
 
 /*export const SignUpNewUser = async (email : string, password : string) => {
@@ -36,7 +37,7 @@ import {
     
     return ((await getDoc(docRef)).data());
   })*/
-export const SignUpNewUser = async (email, password) => {
+export const SignUpNewUser = async (email, password, displayName) => {
   try {
     // Create a new user with email and password
     const userCredential = await createUserWithEmailAndPassword(
@@ -48,9 +49,14 @@ export const SignUpNewUser = async (email, password) => {
 
     console.log('User sign-up succeeded', user);
 
+    if (displayName) {
+      await updateProfile(user, { displayName });
+    }
+
+      //ADD SUMN HERE
     // Add the new user to the Firestore database
     const docRef = await addDoc(collection(db, 'users'), {
-      name: user.displayName || 'Anonymous', // Use "Anonymous" if no display name
+      name: displayName || 'Anonymous', // Use "Anonymous" if no display name
       head_user: false,
       house_id: null,
       createdAt: new Date(),

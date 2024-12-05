@@ -1,4 +1,4 @@
-import { collection, addDoc, getDoc, getDocs, doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { collection, addDoc, getDoc, getDocs, doc, updateDoc, arrayUnion, query, where } from "firebase/firestore";
 import { auth, db } from "../firebaseConfig";
 import { getFunctions, httpsCallable } from "firebase/functions";
 
@@ -26,29 +26,75 @@ async function createHouse(houseName) {
 }
 
 // Invite users to a house
+// async function inviteUserToHouse(houseId, invitedEmails) {
+//     try {
+//         //console.log("the house id is, ", houseId);
+//         const houseRef = collection(db, "houses");
+//         const houseQuery = query(houseRef, where("id", "==", houseId))
+//         const houseData1 = await getDocs(houseQuery);
+
+//         if (houseData1.empty) {
+//             throw new Error(`House with ID ${houseId} does not exist.`);
+//         }
+
+//         const houseData = houseData1.docs[0];
+
+//         if (!houseData.exists()) {
+//             throw new Error(`House with ID ${houseId} does not exist.`);
+//         }
+
+//         console.log("HIII", invitedEmails);
+//         const sendEmail = httpsCallable(functions, "sendEmail");
+
+//         for (const invitee of invitedEmails) {
+//             const joinCode = Math.floor(1000 + Math.random() * 9000);
+
+//             // Update Firestore with invitation data
+//             await updateDoc(houseRef, {
+//                 invitations: arrayUnion(invitee),
+//                 invitationCodes: arrayUnion(joinCode),
+//             });
+
+//             // Call the Cloud Function to send an email
+//             const result = await sendEmail({
+//                 email: invitee,
+//                 joinCode: joinCode,
+//             });
+
+//             console.log(`Email sent to ${invitee}:`, result.data);
+//         }
+//     } catch (error) {
+//         console.error("Error inviting user to house:", error);
+//     }
+// }
 async function inviteUserToHouse(houseId, invitedEmails) {
     try {
-        console.log("the house id is, ", houseId);
         const houseRef = collection(db, "houses");
-        const houseQuery = query(houseRef, where("id", "==", houseId))
+        const houseQuery = query(houseRef, where("id", "==", houseId));
         const houseData1 = await getDocs(houseQuery);
-        const houseData = houseData1.docs[0];
 
-        if (!houseData.exists()) {
+        if (houseData1.empty) {
             throw new Error(`House with ID ${houseId} does not exist.`);
         }
 
-        console.log("HIII", invitedEmails);
+        const houseData = houseData1.docs[0]; // First document
+        
+        console.log("2", houseData.data()); //this works!
+
         const sendEmail = httpsCallable(functions, "sendEmail");
+
+        console.log("here!");
 
         for (const invitee of invitedEmails) {
             const joinCode = Math.floor(1000 + Math.random() * 9000);
 
+            console.log("Updating Firestore for invitee:", invitee);
             // Update Firestore with invitation data
-            await updateDoc(houseRef, {
+            await updateDoc(houseData.ref, {
                 invitations: arrayUnion(invitee),
                 invitationCodes: arrayUnion(joinCode),
             });
+            console.log("Firestore updated successfully for:", invitee);
 
             // Call the Cloud Function to send an email
             const result = await sendEmail({
