@@ -1,4 +1,6 @@
 import React, {useState} from 'react';
+import { updateStatus } from '../../firebase/firebaseConfig';
+
 import {View, Text, TouchableOpacity, FlatList, StyleSheet, Pressable} from 'react-native';
 
 const ExpandableListItem = ({item}) => {
@@ -9,11 +11,14 @@ const ExpandableListItem = ({item}) => {
     setExpanded(!expanded);
   };
 
-  const toggleStatus = (index) => {
+  const toggleStatus = async (index, item) => {
     //HI BACKEND PEOPLE! here you can toggle whether or not they completed the core, the current lines underneath handle it on the front end, but if you're passing in the task status then we can just use that :)
-    const updatedStatuses = [...taskStatuses];
-    updatedStatuses[index] = !updatedStatuses[index];
-    setTaskStatuses(updatedStatuses);
+    console.log("im in the tsx, trying to update chore: ", item.chore);
+    await updateStatus(item.chore);
+    
+    //const updatedStatuses = [...taskStatuses];
+    //updatedStatuses[index] = !updatedStatuses[index];
+    //setTaskStatuses(updatedStatuses);
   };
 
 
@@ -28,7 +33,7 @@ const ExpandableListItem = ({item}) => {
           data={item.tasks}
           renderItem={({item, index}) => {
             return(
-                <Pressable style={styles.choreItem} onPress={() => toggleStatus(index)}>
+                <Pressable style={styles.choreItem} onPress={() => toggleStatus(index, item)}>
                     <View>
                         <Text style={styles.h8}>{item.time}</Text>
                         <Text style={styles.h6}>{item.chore}</Text>

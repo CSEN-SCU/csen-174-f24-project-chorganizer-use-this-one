@@ -13,6 +13,8 @@ import {
 import { inviteUserToHouse } from '../../firebase/firebaseConfig';
 import { house } from './CreateHouseName';
 
+// console.log("hello", house);
+
 function CreateHouseMember({navigation}: {navigation: any}): React.JSX.Element {
   const [currUserAddition, onCurrUserAddition] = useState('');
   const [userSignedUp, onUserSignUp] = useState([]);
@@ -83,6 +85,7 @@ function CreateHouseMember({navigation}: {navigation: any}): React.JSX.Element {
               <TextInput
                 style={styles.nameInput}
                 placeholder="Enter email here"
+                autoCapitalize="none"
                 onChangeText={onCurrUserAddition}
                 value={currUserAddition}
               />
@@ -143,6 +146,7 @@ function CreateHouseMember({navigation}: {navigation: any}): React.JSX.Element {
           <Pressable
             style={styles.buttonPrimary}
             onPress={() => {
+              console.log("hello", house.id);
               inviteUserToHouse(house.id, userSignedUp); //HI BACKEND PEOPLE! here's where you could maybe maybe submit the list of housemates which is called "userSignedUp"
               navigation.navigate('Create House Rooms');
             }}>

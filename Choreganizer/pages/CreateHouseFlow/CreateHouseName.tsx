@@ -18,7 +18,9 @@ let house: any;
 function CreateHouseName({navigation}: {navigation: any}): React.JSX.Element {
   const [houseName, onChangeHouseName] = useState('');
   const submitUserHouseName = () => {
-    house = createHouse(houseName);
+    const houseSnap = createHouse(houseName);
+    const house = houseSnap.data();
+    console.log("HELLO!", house);
     console.log('submitting house info');
   };
 

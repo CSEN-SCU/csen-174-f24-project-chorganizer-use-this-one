@@ -1,8 +1,10 @@
-import { collection, addDoc, getDoc, doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { collection, addDoc, getDoc, getDocs, doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { auth, db } from "../firebaseConfig";
-import * as functions from "firebase-functions";
-import sgMail from "@sendgrid/mail";
+import { getFunctions, httpsCallable } from "firebase/functions";
 
+const functions = getFunctions();
+
+// Create a new house
 async function createHouse(houseName) {
     try {
         const user = auth.currentUser;
@@ -10,102 +12,114 @@ async function createHouse(houseName) {
             name: houseName || "House",
             head_user: user.uid,
             members: [user.uid],
-            invitations: [null],
-            invitationCodes: [null],
-            rooms: [null]
+            invitations: [],
+            invitationCodes: [] || null,
+            rooms: [],
         });
-        await updateDoc(docRef, {id: docRef.id});
-        console.log("Home created successfully");
-        return (await docRef);
-        
+        await updateDoc(docRef, { id: docRef.id });
+        console.log("House created successfully with docRef of ", docRef);
+        return (await getDoc(docRef)).data();
     } catch (error) {
         console.error("Error creating house:", error);
+        throw error;
     }
 }
 
-sgMail.setApiKey(functions.config().sendgrid.key);
-async function sendInvitationEmail(toEmail: string, joinCode: string) {
-    try {
-      const msg = {
-        to: toEmail,
-        from: "choreganizerapp@gmail.com",
-        subject: "Join Your House!",
-        html: `<p>Your one-time code is: <strong>${joinCode}</strong></p>`,
-      };
-
-      const result = await sgMail.send(msg);
-      console.log("Email sent successfully:", result);
-      return result;
-    } catch (error) {
-      console.error("Failed to send email:", error);
-      throw error;
-    }
-  }
-
+// Invite users to a house
 async function inviteUserToHouse(houseId, invitedEmails) {
     try {
-        const houseRef = doc(db, "houses", houseId);
-        const houseData = await getDoc(houseRef);
+        console.log("the house id is, ", houseId);
+        const houseRef = collection(db, "houses");
+        const houseQuery = query(houseRef, where("id", "==", houseId))
+        const houseData1 = await getDocs(houseQuery);
+        const houseData = houseData1.docs[0];
+
         if (!houseData.exists()) {
             throw new Error(`House with ID ${houseId} does not exist.`);
         }
+
+        console.log("HIII", invitedEmails);
+        const sendEmail = httpsCallable(functions, "sendEmail");
+
         for (const invitee of invitedEmails) {
             const joinCode = Math.floor(1000 + Math.random() * 9000);
+
+            // Update Firestore with invitation data
             await updateDoc(houseRef, {
                 invitations: arrayUnion(invitee),
-                invitationCodes: arrayUnion(joinCode)
+                invitationCodes: arrayUnion(joinCode),
             });
-            await sendInvitationEmail(invitee, joinCode);
+
+            // Call the Cloud Function to send an email
+            const result = await sendEmail({
+                email: invitee,
+                joinCode: joinCode,
+            });
+
+            console.log(`Email sent to ${invitee}:`, result.data);
         }
     } catch (error) {
         console.error("Error inviting user to house:", error);
     }
 }
 
+// Verify invitation
 async function verifyInvite(houseId, joinCode) {
     try {
         const user = auth.currentUser;
         const houseRef = doc(db, "houses", houseId);
         const houseData = await getDoc(houseRef);
+
         if (!houseData.exists()) {
             throw new Error(`House with ID ${houseId} does not exist.`);
         }
-        const index = houseData.data().invitations.indexOf(user.email);
-        if (joinCode === houseData.data().invitationCodes[index]) {
-            houseData.data().invitations[index] = null;
-            houseData.data().invitationCodes[index] = null;
+
+        const data = houseData.data();
+        const index = data.invitations.indexOf(user?.email);
+
+        if (index >= 0 && data.invitationCodes[index] === joinCode) {
+            // Update Firestore with new member and clear invitation
             await updateDoc(houseRef, {
-                members: arrayUnion(user.uid)
+                members: arrayUnion(user.uid),
+                invitations: data.invitations.filter((_, i) => i !== index),
+                invitationCodes: data.invitationCodes.filter((_, i) => i !== index),
             });
+
+            // Link the user to the house in Firestore
+            const userRef = doc(db, "users", user.uid);
+            await updateDoc(userRef, { house_id: houseId });
+
+            console.log("User successfully added to house");
+        } else {
+            throw new Error("Invalid join code or email not invited.");
         }
-        const userRef = doc(db, "users", user.uid);
-        await updateDoc(userRef, { house_id: houseId });
-        console.log("User added to house");
     } catch (error) {
-        console.error("Error joining house:", error);
+        console.error("Error verifying invite:", error);
     }
 }
 
+// Get housemates
 async function getHousemates(houseId) {
     try {
         const houseRef = doc(db, "houses", houseId);
         const houseData = await getDoc(houseRef);
+
         if (!houseData.exists()) {
             throw new Error(`House with ID ${houseId} does not exist.`);
         }
-        const members = houseData.data().members;
-        const housemates = [];
 
-        for (const memberId of members) {
-            const userRef = doc(db, "users", memberId);
-            const userDoc = await getDoc(userRef);
-            if (userDoc.exists()) {
-                housemates.push(userDoc.data());
-            } else {
-                console.warn(`User with ID ${memberId} does not exist.`);
-            }
-        }
-        return housemates;
+        const members = houseData.data().members;
+
+        // Fetch all housemates concurrently
+        const housemates = await Promise.all(
+            members.map(async (memberId) => {
+                const userRef = doc(db, "users", memberId);
+                const userDoc = await getDoc(userRef);
+                return userDoc.exists() ? userDoc.data() : null;
+            })
+        );
+
+        return housemates.filter(Boolean); // Remove null values
     } catch (error) {
         console.error("Error getting housemates:", error);
     }
