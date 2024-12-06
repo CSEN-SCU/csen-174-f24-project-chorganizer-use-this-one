@@ -9,50 +9,57 @@ import {
   FlatList,
 } from 'react-native';
 import ExpandableList from '../assets/components/CollapsibleView';
-import {totalData} from '../assets/totalData';
-import { getUserInfo, getXUsersChoreData, auth } from '../firebase/firebaseConfig';
+import {
+  getUserInfo,
+  getXUsersChoreData,
+  getXUsersChoreDataPersonal,
+  auth,
+} from '../firebase/firebaseConfig';
+import {collection, onSnapshot} from 'firebase/firestore';
+import {db} from '../firebase/firebaseConfig';
 
-function Personal ({navigation}) {
-  
-  const userInfo = auth.currentUser?.uid;          //getUserInfo();  // HI FRONTEND! you could do userInfo.name or .streaks, notifs and chores are from eerina and arrans branch
+function Personal({navigation}) {
+  const userInfo = auth.currentUser?.uid;
   const userName = auth.currentUser?.displayName;
+  const [userStreak, setUserStreak] = useState(0);
   const [numChores, setNumChores] = useState(0);
-  const [currentUserChoreNames, setCurrentUserChoreNames] = useState<string[]>([]);
+  const [currentUserChoreNames, setCurrentUserChoreNames] = useState<string[]>(
+    [],
+  );
+  const [upcomingText, setUpcomingText] = useState("");
+
   useEffect(() => {
-    if (!userInfo) return; 
+    const unsubscribe = onSnapshot(collection(db, 'chores'), snapshot => {
+      if (!userInfo) return;
+      const fetchChores = async () => {
+        try {
+          const userInfoForStreak = await getUserInfo(userInfo);
+          setUserStreak(userInfoForStreak.streak);
 
-    console.log("Fetching chores for user:", userInfo);
-    const fetchChores = async () => {
-      try {
-        const chores = await getXUsersChoreData(userInfo); 
-        setCurrentUserChoreNames(chores);
-        setNumChores(chores.length); 
-        console.log("Chores fetched successfully:", chores);
-      } catch (error) {
-        console.error("Error fetching chore data:", error);
-      }
-    };
-    fetchChores(); 
-  }, [userInfo]);
+          const chores = await getXUsersChoreDataPersonal(userInfo);
+          setCurrentUserChoreNames(chores);
 
+          setUpcomingText(chores[0].name + ": " + chores[0].tasks[0].name);
 
+          let counter = 0;
+          chores.forEach(room => {
+            room.tasks.forEach((chore) => {
+              if(!chore.choreStatus){
+                counter++;
+              }
+            })
+          });
 
-
-  /*useEffect(() => {
-    console.log("round 2 in Personal.tsx), this is the userInfo being passed: ", userInfo);
-    const currentUserChoreNames = getXUsersChoreData(userInfo)
-    
-      .then((currentUserChoreNames) => {
-        setCurrentUserChoreNames(currentUserChoreNames);
-        const numChores = currentUserChoreNames.length;
-        console.log("Number of chores (this is in Personal.tsx):", numChores);
-        setNumChores(numChores); // Update state with the number of chores
-      })
-      .catch((error) => {
-        console.error("Error fetching chore data:", error);
-      });
-  }, [userInfo]);*/
-
+          setNumChores(counter);
+          console.log('Chores fetched successfully:', chores);
+        } catch (error) {
+          console.error('Error fetching chore data:', error);
+        }
+      };
+      fetchChores();
+    });
+    return () => {unsubscribe()};
+  }, [, userInfo]);
 
   const renderItem = ({item}) => {
     switch (item.key) {
@@ -80,7 +87,7 @@ function Personal ({navigation}) {
                 style={{marginBottom: 10}}
                 source={require('../assets/images/Streak.png')}
               />
-              <Text style={styles.h6}>X day streak</Text>
+              <Text style={styles.h6}>{userStreak} day streak</Text>
             </View>
 
             <View style={styles.upcomingBox}>
@@ -88,18 +95,16 @@ function Personal ({navigation}) {
               <View style={styles.upcomingTextSection}>
                 <Text style={styles.h6}>Upcoming</Text>
                 <Text style={styles.h8}>
-                  "You have stuff to do. Witerwally go do it. 🎩" -Abraham
-                  Lincoln
+                  {upcomingText}
                 </Text>
               </View>
             </View>
           </View>
         );
       case 'chores':
-        const choreData = currentUserChoreNames.map(chore => ({ data: chore }));
         return (
           <View style={styles.expandableContainer}>
-            <ExpandableList data={choreData} />
+            <ExpandableList data={currentUserChoreNames} />
           </View>
         );
       default:

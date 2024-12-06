@@ -4,41 +4,41 @@ import { updateStatus } from '../../firebase/firebaseConfig';
 import {View, Text, TouchableOpacity, FlatList, StyleSheet, Pressable} from 'react-native';
 
 const ExpandableListItem = ({item}) => {
+  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
   const [expanded, setExpanded] = useState(false);
-  const [taskStatuses, setTaskStatuses] = useState(item.tasks.map(task => task.status));
 
   const toggleExpand = () => {
     setExpanded(!expanded);
   };
 
-  const toggleStatus = async (index, item) => {
+  const toggleStatus = async (item) => {
     //HI BACKEND PEOPLE! here you can toggle whether or not they completed the core, the current lines underneath handle it on the front end, but if you're passing in the task status then we can just use that :)
     console.log("im in the tsx, trying to update chore: ", item.chore);
-    await updateStatus(item.chore);
-    
-    //const updatedStatuses = [...taskStatuses];
-    //updatedStatuses[index] = !updatedStatuses[index];
-    //setTaskStatuses(updatedStatuses);
+    await updateStatus(item);
+  
   };
 
 
   return (
+    //ARRAN: this is the list containing the chores per room so for example: 
     <View style={styles.itemContainer}>
       <TouchableOpacity onPress={toggleExpand} style={styles.itemTouchable}>
+        {/* this below is the name of the room */}
         <Text style={styles.itemTitle}>{item.name}</Text>
         {expanded ? <Text>🔼</Text> : <Text>🔽</Text>}
       </TouchableOpacity>
       {expanded && (
+        // this below is iterating through the list of the chores per room
         <FlatList
           data={item.tasks}
-          renderItem={({item, index}) => {
+          renderItem={({item}) => {
             return(
-                <Pressable style={styles.choreItem} onPress={() => toggleStatus(index, item)}>
+                <Pressable style={styles.choreItem} onPress={() => toggleStatus(item)}>
                     <View>
-                        <Text style={styles.h8}>{item.time}</Text>
-                        <Text style={styles.h6}>{item.chore}</Text>
+                        <Text style={styles.h8}>Due {daysOfWeek[new Date(item.dueDate.seconds * 1000).getDay()]}</Text>
+                        <Text style={styles.h6}>{item.name}</Text>
                     </View>
-                    {taskStatuses[index] ? <Text>✅</Text> : <Text>⭕️</Text>}
+                    {item.choreStatus ? <Text>✅</Text> : <Text>⭕️</Text>}
                 </Pressable>
             )
           }}

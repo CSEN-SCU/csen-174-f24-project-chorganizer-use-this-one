@@ -155,7 +155,6 @@ function CreateHouseRooms({navigation}: {navigation: any}): React.JSX.Element {
           <Pressable
             style={styles.buttonPrimary}
             onPress={() => {
-              
               //HI BACKEND PEOPLE! PUT HERE THE SUBMISSION OF THE "rooms" ARRAY, JUST RIGHT ABOVE THE NAVIGATION LINE
               //YOU'RE KILLING IT! -beatrice & madi
               submitRoomInfo(rooms);
