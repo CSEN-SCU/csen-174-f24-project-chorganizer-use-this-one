@@ -3,13 +3,21 @@ import { collection, addDoc, doc, updateDoc, getDoc, getDocs, setDoc } from 'fir
 import { MessReportTemplate, MessReportConverter } from '../types/mess';
 
 
-const getHomeByUserId = (userId: string) => {
-    return "HDcZIWSEAnWKRdEuvHAxZNewomj2";
-}
-
+const getHouseByUserId = async(userId: string) => {
+    try {
+    const userDoc = await getDoc(doc(db, `users/${userId}`));
+    if (!userDoc.exists()) {
+      throw new Error("No such user");
+    }
+    return userDoc.data().house_id
+    } catch (e) {
+      console.error("Error getting document: ", e);
+      throw e;
+    }
+  }
 export const reportMess = async (reporterUserId: string, message: string | null) => {
-    const home_id = getHomeByUserId(reporterUserId);
-    const messesCollectionRef = collection(db, `homes/${home_id}/messes`);
+    const home_id = getHouseByUserId(reporterUserId);
+    const messesCollectionRef = collection(db, `houses/${home_id}/messes`);
     const docRef = doc(messesCollectionRef);
     const mess: MessReportTemplate = { id: docRef.id, message: message, createdAt: new Date(), claimerUserId: null, reporterUserId: reporterUserId }
     try {
@@ -23,9 +31,9 @@ export const reportMess = async (reporterUserId: string, message: string | null)
 }
 
 export const claimMess = async (mess_id: string, claimerUserId: string) => {
-    const home_id = getHomeByUserId(claimerUserId);
+    const home_id = getHouseByUserId(claimerUserId);
     console.log(home_id, claimerUserId)
-    const docRef = doc(collection(db, `homes/${home_id}/messes`), mess_id);
+    const docRef = doc(collection(db, `houses/${home_id}/messes`), mess_id);
     try {
         await updateDoc(docRef, {
             claimerUserId: claimerUserId,
@@ -38,8 +46,8 @@ export const claimMess = async (mess_id: string, claimerUserId: string) => {
 }
 
 export const getAllMessReports = async (user_id: string): Promise<MessReportTemplate[]> => {
-    const home_id = getHomeByUserId(user_id);
-    const messesCollectionRef = collection(db, `homes/${home_id}/messes`).withConverter(MessReportConverter);
+    const home_id = getHouseByUserId(user_id);
+    const messesCollectionRef = collection(db, `houses/${home_id}/messes`).withConverter(MessReportConverter);
 
     // Fetch all reported messes for this home
     const messesSnapshot = await getDocs(messesCollectionRef);
@@ -48,8 +56,8 @@ export const getAllMessReports = async (user_id: string): Promise<MessReportTemp
     return messes
 }
 export const getMessReport = async (user_id: string, mess_id: string): Promise<MessReportTemplate> => {
-    const home_id = getHomeByUserId(user_id);
-    const messRef = doc(db, `homes/${home_id}/messes/${mess_id}`).withConverter(MessReportConverter);
+    const home_id = getHouseByUserId(user_id);
+    const messRef = doc(db, `houses/${home_id}/messes/${mess_id}`).withConverter(MessReportConverter);
     try {
         const mess = await getDoc(messRef);
         if (!mess.exists()) {

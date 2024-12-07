@@ -10,10 +10,11 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
+  Alert,
 } from 'react-native';
 import { reportMess } from '../firebase/report-mess/reportMess';
 import {auth} from '../firebase/firebaseConfig';
-import { addMessNotification } from '../firebase/notifs/notifications.ts';
+import { addMessNotification, emailMessNotification} from '../firebase/notifs/notifications.ts';
 
 interface Chore {
   title: string;
@@ -77,7 +78,13 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
     // Report a Mess
     const user_id = auth.currentUser!.uid
     reportMess(user_id, reportText).then((mess_id) => {
+
+        // create a mess notification in the database
         addMessNotification(user_id, mess_id, reportText);
+        emailMessNotification(user_id, reportText)
+
+        // send mess notification via email
+
     })
     setReportText(''); // Clear input after reporting mess
   };
