@@ -24,8 +24,8 @@ async function createChore(
   try {
     const choreRef = await addDoc(collection(db, 'chores'), {
       name: choreName,
-      dueDate:
-        choreDue || new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
+      choreDue: null,
+        //choreDue || new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
       house: houseId,
       roomId: roomId || null,
       choreStatus: choreStatus || false,
@@ -34,6 +34,7 @@ async function createChore(
     });
     console.log('Chore created successfully w/ id of ', choreRef.id);
     await updateDoc(choreRef, {id: choreRef.id});
+    //await updateDoc(choreRef, {choreDue: choreRef.id});
 
     //return ((await getDoc(choreRef) ).data())
   } catch (error) {
@@ -71,10 +72,12 @@ async function assignChorestoUsers(houseId) {
       );
 
       await updateDoc(doc(db, 'chores', choreId), {choreUser: assignedUser});
-
       await updateDoc(doc(db, 'users', assignedUser), {
         choreAssigned: arrayUnion(choreId),
       });
+      //await updateDoc(doc(db, 'users', assignedUser), {
+      //  choreAssigned: [choreId], // Replace old chores with the new one
+      //});
 
       userIndex = (userIndex + 1) % numUsers;
     }
@@ -82,6 +85,59 @@ async function assignChorestoUsers(houseId) {
     console.error('Error assigning chore to user! error: ', error);
   }
 }
+
+async function redistributeChores(houseId) {
+  try {
+    const userRef = collection(db, 'users');
+    const choreRef = collection(db, 'chores');
+
+    const choreQuery = query(choreRef, where('house', '==', houseId));
+    const userQuery = query(userRef, where('house_id', '==', houseId));
+
+    const choreCheck = await getDocs(choreQuery);
+    const userCheck = await getDocs(userQuery);
+
+    const userIds = userCheck.docs.map(userDoc => userDoc.id);
+    const chores = choreCheck.docs;
+
+    const numUsers = userIds.length;
+    const numChores = chores.length;
+
+    if (numUsers === 0 || numChores === 0) {
+      console.log('No users or chores available to assign.');
+      return;
+    }
+
+    // Step 1: Unassign all current chores from users
+    for (const userDoc of userCheck.docs) {
+      await updateDoc(doc(db, 'users', userDoc.id), {
+        choreAssigned: [], // Clear current chores
+      });
+    }
+
+    // Step 2: Redistribute chores
+    let userIndex = 0;
+    for (const choreDoc of chores) {
+      const choreId = choreDoc.id; // Chore document ID
+      const choreData = choreDoc.data();
+
+      const assignedUser = userIds[userIndex];
+      console.log(
+        `Assigning chore "${choreData.name}" to user "${assignedUser}"`,
+      );
+
+      await updateDoc(doc(db, 'chores', choreId), { choreUser: assignedUser });
+      await updateDoc(doc(db, 'users', assignedUser), {
+        choreAssigned: arrayUnion(choreId), // Add chore to user's list
+      });
+
+      userIndex = (userIndex + 1) % numUsers;
+    }
+  } catch (error) {
+    console.error('Error redistributing chores! Error: ', error);
+  }
+}
+
 
 async function checkDueDate(choreId, db) {
   try {
@@ -91,7 +147,7 @@ async function checkDueDate(choreId, db) {
     const currDate = new Date();
 
     if (
-      choreData.dueDate.toDate() <= currDate ||
+      choreData.choreDate.toDate() <= currDate ||
       choreData.choreStatus == true
     ) {
       console.log('chore is not due yet, returning false!');
@@ -196,6 +252,7 @@ export {
   updateStatus,
   getXUsersChoreData,
   getXUsersChoreDataPersonal,
+  redistributeChores,
 };
 
 [

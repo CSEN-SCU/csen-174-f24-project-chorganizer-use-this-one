@@ -35,7 +35,7 @@ const ExpandableListItem = ({item}) => {
             return(
                 <Pressable style={styles.choreItem} onPress={() => toggleStatus(item)}>
                     <View>
-                        <Text style={styles.h8}>Due {daysOfWeek[new Date(item.dueDate.seconds * 1000).getDay()]}</Text>
+                        
                         <Text style={styles.h6}>{item.name}</Text>
                     </View>
                     {item.choreStatus ? <Text>✅</Text> : <Text>⭕️</Text>}

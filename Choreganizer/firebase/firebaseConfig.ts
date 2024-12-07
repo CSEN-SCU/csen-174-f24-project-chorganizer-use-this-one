@@ -1,10 +1,13 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from "firebase/auth";
 import { getFirestore} from "firebase/firestore";
+//import * as functions from "firebase-functions";
+//const functions = require('firebase-functions');
+//import * as functions from "firebase-functions";
 import { SignUpNewUser, SignInUser, toggleNotifs, getUserInfo } from "./users/users";
 import { createRoom, assignChorestoRooms, assignUser } from "./rooms/rooms.js";
-import { createHouse, inviteUserToHouse, verifyInvite, getHousemates } from './houses/houses.js';
-import { createChore, assignChorestoUsers, checkDueDate, updateStatus, getXUsersChoreData, getXUsersChoreDataPersonal } from './chores/chores.js';
+import { createHouse, inviteUserToHouse, verifyInvite, getHousemates, assignChorestoHouse, swapTimeChecker } from './houses/houses.js';
+import { createChore, assignChorestoUsers, checkDueDate, updateStatus, getXUsersChoreData, getXUsersChoreDataPersonal, redistributeChores } from './chores/chores.js';
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -26,4 +29,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-export { app, auth, db, SignUpNewUser, SignInUser, getUserInfo, createHouse, inviteUserToHouse, verifyInvite, getHousemates, toggleNotifs, createChore, assignChorestoUsers, checkDueDate, updateStatus, createRoom, assignChorestoRooms, assignUser, getXUsersChoreData, getXUsersChoreDataPersonal };
+//export const scheduledSwapTimeChecker = functions.pubsub
+
+export { app, auth, db, SignUpNewUser, SignInUser, getUserInfo, createHouse, inviteUserToHouse, verifyInvite, getHousemates, toggleNotifs, createChore, assignChorestoUsers, checkDueDate, updateStatus, createRoom, assignChorestoRooms, assignUser, getXUsersChoreData, getXUsersChoreDataPersonal, assignChorestoHouse, swapTimeChecker, redistributeChores };
