@@ -147,7 +147,7 @@ async function getXUsersChoreData(userId) {
   const choreSnapshot = await getDocs(choreQuery);
   //const justChoreNamesArray = choreSnapshot.data();
   //const justNames = justChoreNamesArray.name;
-  const justChoreNamesArray = choreSnapshot.docs.map(doc => doc.data().name);
+  const justChoreNamesArray = choreSnapshot.docs.map(doc => doc.data());
 
   console.log(correct, " user's chores r these: ", justChoreNamesArray);
   return justChoreNamesArray;

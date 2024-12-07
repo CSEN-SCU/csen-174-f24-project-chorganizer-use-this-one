@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -11,9 +11,15 @@ import {
   Modal,
   TextInput,
 } from 'react-native';
-import { totalData } from '../assets/totalData';
-import { getHousemates } from '../firebase/firebaseConfig';
-import { house } from './CreateHouseFlow/CreateHouseName';
+import {totalData} from '../assets/totalData';
+import {
+  getHousemates,
+  getUserInfo,
+  getXUsersChoreData,
+  auth,
+} from '../firebase/firebaseConfig';
+import {collection, onSnapshot} from 'firebase/firestore';
+import {db} from '../firebase/firebaseConfig';
 
 interface Chore {
   title: string;
@@ -25,54 +31,121 @@ interface Housemate {
   chores: Chore[];
 }
 
-function Home({ navigation }: { navigation: any }): React.JSX.Element {
+function Home({navigation}: {navigation: any}): React.JSX.Element {
   const [currentChoreIndex, setCurrentChoreIndex] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [reportText, setReportText] = useState('');
+  const [totalUserChores, setTotalUserChores] = useState([]);
 
-  // HI FRONTEND! use this housemates line:
-  // const housemates = getHousemates(house.id);
+  const userID = auth.currentUser?.uid;
+
+
+  // Inside useEffect:
+useEffect(() => {
+  const unsubscribe = onSnapshot(collection(db, 'chores'), snapshot => {
+    if (!userID) return;
+    // const fetchChores = async () => {
+    //   try {
+    //     const userInfo = await getUserInfo(userID);
+    //     const houseID = userInfo?.house_id;
+
+    //     const houseMateChoresArr = await getHousemates(houseID);
+    //     console.log("step1: ", houseMateChoresArr);
+
+    //     const toPresentArr = [];
+    //     houseMateChoresArr.forEach(async (housemate)=>{
+    //       const userChoreData = await getXUsersChoreData(housemate.uid);
+    //       toPresentArr.push({
+    //         "name": housemate.name,
+    //         "chores": userChoreData
+    //       })
+    //     })
+
+    //     await setTotalUserChores(toPresentArr);
+
+    //     console.log('Chores fetched successfully:', totalUserChores);
+    //   } catch (error) {
+    //     console.error('Error fetching chore data:', error);
+    //   }
+    // };
+    const fetchChores = async () => {
+      try {
+        const userInfo = await getUserInfo(userID);
+        const houseID = userInfo?.house_id;
+    
+        const houseMateChoresArr = await getHousemates(houseID);
+        console.log("step1: ", houseMateChoresArr);
+    
+        const toPresentArr = await Promise.all(
+          houseMateChoresArr.map(async housemate => {
+            const userChoreData = await getXUsersChoreData(housemate.uid);
+            return {
+              name: housemate.name,
+              chores: userChoreData,
+            };
+          })
+        );
+    
+        setTotalUserChores(toPresentArr);
+        console.log('Chores fetched successfully:', toPresentArr);
+      } catch (error) {
+        console.error('Error fetching chore data:', error);
+      }
+    };
+    
+
+    fetchChores();
+  });
+  return () => {
+    unsubscribe();
+  };
+}, [userID]);
+  
+  //const testing = getHousemates(house.id);
+  //console.log("AAA House members", testing)
   // for each housemate in housemates, you could do housemate.name, and then arran should have a get chores function for each user
+
   const housemates: Housemate[] = [
     {
       name: 'Olivia',
       chores: [
-        { title: 'Mop Floors', daysLeft: 3 },
-        { title: 'Wipe Stove Top', daysLeft: 1 },
-        { title: 'Clean Fridge', daysLeft: 4 },
-        { title: 'Sweep Ground', daysLeft: 2 },
-        { title: 'Bleach Toilet', daysLeft: 5 },
+        {title: 'Mop Floors', daysLeft: 3},
+        {title: 'Wipe Stove Top', daysLeft: 1},
+        {title: 'Clean Fridge', daysLeft: 4},
+        {title: 'Sweep Ground', daysLeft: 2},
+        {title: 'Bleach Toilet', daysLeft: 5},
       ],
     },
     {
       name: 'Liam',
       chores: [
-        { title: 'Mop Floors', daysLeft: 3 },
-        { title: 'Mop Floors', daysLeft: 1 },
-        { title: 'Mop Floors', daysLeft: 4 },
-        { title: 'Mop Floors', daysLeft: 2 },
-        { title: 'Mop Floors', daysLeft: 5 },
+        {title: 'Mop Floors', daysLeft: 3},
+        {title: 'Mop Floors', daysLeft: 1},
+        {title: 'Mop Floors', daysLeft: 4},
+        {title: 'Mop Floors', daysLeft: 2},
+        {title: 'Mop Floors', daysLeft: 5},
+        {title: 'Mop Floors', daysLeft: 5},
+        {title: 'Mop Floors', daysLeft: 5},
+        {title: 'Mop Floors', daysLeft: 5},
+        {title: 'Mop Floors', daysLeft: 5},
+        {title: 'Mop Floors', daysLeft: 5},
       ],
     },
     {
       name: 'Emma',
-      chores: [
-        { title: 'Mop Floors', daysLeft: 3 },
-        { title: 'Sweep Ground', daysLeft: 1 },
-        { title: 'Sweep Ground', daysLeft: 4 },
-        { title: 'Sweep Ground', daysLeft: 2 },
-        { title: 'Sweep Ground', daysLeft: 5 },
-      ],
+      chores: [{title: 'Mop Floors', daysLeft: 3}],
     },
   ];
 
   const nextChore = () => {
-    setCurrentChoreIndex((currentIndex) => (currentIndex + 1) % housemates.length);
+    setCurrentChoreIndex(
+      currentIndex => (currentIndex + 1) % totalUserChores.length,
+    );
   };
 
   const prevChore = () => {
-    setCurrentChoreIndex((currentIndex) =>
-      currentIndex === 0 ? housemates.length - 1 : currentIndex - 1
+    setCurrentChoreIndex(currentIndex =>
+      currentIndex === 0 ? totalUserChores.length - 1 : currentIndex - 1,
     );
   };
 
@@ -86,7 +159,7 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
 
     // Find the current user and update their notifications in totalData
     const currentUserData = totalData.houseMates.find(
-      mate => mate.name === totalData.currentUser
+      mate => mate.name === totalData.currentUser,
     );
 
     if (currentUserData) {
@@ -98,26 +171,29 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+      }}>
       <ImageBackground
         source={require('../assets/images/backgroundBlur.png')}
         style={styles.background}
-        resizeMode="cover"
-      >
+        resizeMode="cover">
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
             width: '100%',
             justifyContent: 'center',
             alignItems: 'flex-start',
-          }}
-        >
+          }}>
           <View style={styles.welcomeContainer}>
             <Text style={styles.h2}>Welcome Home!</Text>
             <Pressable
               onPress={() => navigation.navigate('Notification')}
-              accessibilityLabel="Open notifications"
-            >
+              accessibilityLabel="Open notifications">
               <Image
                 style={styles.notificationIcon}
                 source={require('../assets/images/Inbox.png')}
@@ -128,8 +204,7 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
           <TouchableOpacity
             style={styles.reportButton}
             onPress={() => setModalVisible(true)}
-            accessibilityLabel="Report a mess"
-          >
+            accessibilityLabel="Report a mess">
             <Image
               style={styles.reportIcon}
               source={require('../assets/images/ReportIcon.png')}
@@ -142,24 +217,21 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
             visible={modalVisible}
             animationType="slide"
             transparent={true}
-            onRequestClose={() => setModalVisible(false)}
-          >
+            onRequestClose={() => setModalVisible(false)}>
             <View style={styles.modalOverlay}>
               <View style={styles.modalContainer}>
                 <Pressable
                   onPress={() => setModalVisible(false)}
                   style={styles.closeButton}
-                  accessibilityLabel="Close report modal"
-                >
+                  accessibilityLabel="Close report modal">
                   <Text style={styles.closeButtonText}>X</Text>
                 </Pressable>
                 <View style={styles.modalHeader}>
-                <Image
+                  <Image
                     style={styles.reportIcon}
                     source={require('../assets/images/ReportIcon.png')}
                   />
                   <Text style={styles.modalTitle}>Report a Mess</Text>
-                  
                 </View>
                 <TextInput
                   style={styles.reportInput}
@@ -173,49 +245,56 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
                   onPress={() => {
                     handleAddNotification();
                     setModalVisible(false);
-                    navigation.navigate('Notification', { newReport: reportText });
-                  }}
-                >
+                    navigation.navigate('Notification', {
+                      newReport: reportText,
+                    });
+                  }}>
                   <Text style={styles.postReportButtonText}>Post Report</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </Modal>
 
-         {/* Housemate Chores Section */}
+          {/* Housemate Chores Section */}
           <View style={styles.choreContainer}>
             <View style={styles.choreNavigation}>
               <TouchableOpacity onPress={prevChore} style={styles.navButton}>
-              <Image
-              style={styles.chevronIcons}
-              source={require('../assets/images/ChevronLeft.png')}
-            />
+                <Image
+                  style={styles.chevronIcons}
+                  source={require('../assets/images/ChevronLeft.png')}
+                />
               </TouchableOpacity>
 
+              {totalUserChores.length > 0 &&
               <View style={styles.choreCard}>
-                <Text style={styles.choreName}>{housemates[currentChoreIndex].name}</Text>
-                {housemates[currentChoreIndex].chores.length > 0 ? (
-                  housemates[currentChoreIndex].chores.map((chore, index) => (
+                <Text style={styles.choreName}>
+                  {totalUserChores[currentChoreIndex]?.name}
+                </Text>
+                {totalUserChores[currentChoreIndex].chores.length > 0 ? (
+                  totalUserChores[currentChoreIndex].chores.map((chore, index) => (
                     <View key={index} style={styles.choreItem}>
                       <View style={styles.choreTextContainer}>
-                        <Text style={styles.choreDays}>{chore.daysLeft} days left</Text>
-                        <Text style={styles.choreTitle}>{chore.title}</Text>
+                        <Text style={styles.choreDays}>
+                          {chore.choreStatus ? "Done" : "Incomplete"}
+                        </Text>
+                        <Text style={styles.choreTitle}>{chore.name}</Text>
                       </View>
                       <TouchableOpacity style={styles.fistBumpButton}>
-                        <Text style={styles.fistBumpIcon}>👊</Text>
+                        <Text style={styles.fistBumpIcon}>{chore.choreStatus ? "✅" : "👊"}</Text>
                       </TouchableOpacity>
-                </View>
+                    </View>
                   ))
                 ) : (
                   <Text>No chores assigned.</Text>
                 )}
               </View>
+              }
 
               <TouchableOpacity onPress={nextChore} style={styles.navButton}>
-              <Image
-              style={styles.chevronIcons}
-              source={require('../assets/images/ChevronRight.png')}
-            />
+                <Image
+                  style={styles.chevronIcons}
+                  source={require('../assets/images/ChevronRight.png')}
+                />
               </TouchableOpacity>
             </View>
           </View>
@@ -260,7 +339,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
@@ -277,7 +356,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginRight: 60,
   },
-choreContainer: {
+  choreContainer: {
     width: '90%',
     alignItems: 'center',
     justifyContent: 'center',
@@ -292,14 +371,11 @@ choreContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1,
-
-     
   },
 
   chevronIcons: {
     width: 30,
     height: 30,
-   
   },
 
   navButton: {
@@ -313,13 +389,13 @@ choreContainer: {
     zIndex: 10,
 
     // Drop shadow for iOS
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.25,
-  shadowRadius: 4,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
 
-  // Drop shadow for Android
-  elevation: 5,
+    // Drop shadow for Android
+    elevation: 5,
   },
   navButtonText: {
     color: '#fff',
@@ -333,15 +409,14 @@ choreContainer: {
     alignItems: 'flex-start',
     marginHorizontal: 20, // Add margin to separate each card
 
-     // Drop shadow for iOS
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.25,
-  shadowRadius: 4,
+    // Drop shadow for iOS
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
 
-  // Drop shadow for Android
-  elevation: 5,
-
+    // Drop shadow for Android
+    elevation: 5,
   },
   choreName: {
     fontSize: 24,
@@ -360,17 +435,18 @@ choreContainer: {
     alignItems: 'center',
     justifyContent: 'space-between',
 
-     // Drop shadow for iOS
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.25,
-  shadowRadius: 4,
+    // Drop shadow for iOS
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
 
-  // Drop shadow for Android
-  elevation: 5,
+    // Drop shadow for Android
+    elevation: 5,
   },
   choreTextContainer: {
-    flexDirection: 'column', // Stack "3 days left" and "Mop Floors" vertically
+    flexDirection: 'column',
+    justifyContent: 'center',
   },
   choreDays: {
     color: '#999',
@@ -401,7 +477,7 @@ choreContainer: {
     borderRadius: 15,
     padding: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
@@ -416,7 +492,6 @@ choreContainer: {
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-
   },
   modalTitle: {
     fontSize: 24,
