@@ -1,49 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ImageBackground, FlatList, Pressable, ScrollView } from 'react-native';
-import { totalData } from '../assets/totalData';
+import { NotificationTag, NotificationTemplate
+ } from '../firebase/types/notification';
+import { auth } from '../firebase/firebaseConfig';
+import { listenForUnreadNotifications, markNotificationAsRead } from '../firebase/notifs/notifications';
+import { claimMess } from '../firebase/report-mess/reportMess';
 
 function Notifications({ route, navigation: _navigation }: { route: any; navigation: any }): React.JSX.Element {
   const { newReport } = route.params || {}; // Retrieve new report from navigation params
-  const currentUser = totalData.currentUser;
-  const currentUserData = totalData.houseMates.find(mate => mate.name === currentUser);
-
-    //Commented out my attempt to get the format of the time to be more readable
-
-  // const fakeNotifications = [
-  //   { tags: 'Achievement', message: '10 day streak!', time: new Date(new Date().getTime() - 1 * 60 * 1000).toISOString() },
-  //   { tags: 'Mess reported', message: 'Spill in the kitchen', time: new Date(new Date().getTime() - 10 * 60 * 1000).toISOString() },
-  //   { tags: 'Bump 👊', message: 'Mop floors', time: new Date(new Date().getTime() - 3 * 60 * 60 * 1000).toISOString() },
-  //   { tags: 'Reminder', message: 'Bleach towels', time: new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000).toISOString() },
-  //   { tags: 'Reminder', message: 'Buy detergent', time: new Date(new Date().getTime() - 3 * 24 * 60 * 60 * 1000).toISOString() },
-  // ];
-
-  // const [notifications, setNotifications] = useState(
-  //   currentUserData?.notifications || fakeNotifications
-  // );
 
   // Initialize notifications, including both old and new notifications
- const [notifications, setNotifications] = useState<{ time: string; message: string; tags: string; isNew?: boolean }[]>(currentUserData?.notifications || []);
+ const [notifications, setNotifications] = useState<NotificationTemplate[]>([]);
 
- useEffect(() => {
-  if (newReport) {
-    const newNotification = {
-      tags: 'Mess reported',
-      message: newReport,
-      time: new Date().toLocaleTimeString(),
-      isNew: true,
-    };
-    // Prepend the new notification to the existing list to ensure it appears at the top
-    setNotifications(prevNotifications => [newNotification, ...prevNotifications]);
-  }
+  useEffect(() => {
+
+    const unsubscribe = listenForUnreadNotifications(auth.currentUser!.uid, setNotifications);
+    return () => unsubscribe();
 }, [newReport]);
 
-
   const handleDeleteNotification = (index: number) => {
-    setNotifications(prevNotifications => prevNotifications.filter((_, i) => i !== index));
+    const uid = auth.currentUser!.uid;
+
+      // if it's a mess, claim it
+      if (notifications[index].tag === NotificationTag.MESS) {
+        claimMess(notifications[index].choreId, uid).then(() => {
+          }).catch((error) => {
+            console.error('Error claiming mess:', error);
+          })
+      } 
+      // delete notification from view 
+      setNotifications(prevNotifications => prevNotifications.filter((_, i) => i !== index));
+      markNotificationAsRead(uid, notifications[index].id);
+      
   };
 
-  const handleNotificationPress = (item: { tags: string; message: string; time: string; isNew?: boolean }) => {
-    if (item.tags !== 'Mess reported') {
+  const handleNotificationPress = (item: NotificationTemplate) => {
+    if (item.tag !== NotificationTag.MESS) {
       _navigation.navigate('Personal'); 
     }
   };
@@ -96,22 +88,22 @@ function Notifications({ route, navigation: _navigation }: { route: any; navigat
                 <View style={styles.notificationItem}>
                   <View style={styles.notificationHeader}>
                     <View style={
-                      item.tags === 'Bump 👊' ? styles.bumpNotif : 
-                      item.tags === 'Achievement' ? styles.achievementNotif : 
-                      item.tags === 'Reminder' ? styles.reminderNotif : 
+                      item.tag === NotificationTag.BUMP ? styles.bumpNotif : 
+                      item.tag ===  NotificationTag.ACHEIVEMENT ? styles.achievementNotif : 
+                      item.tag ===  NotificationTag.REMINDER ? styles.reminderNotif : 
                       styles.messNotif
                     }>
-                      <Text style={{ color: '#656565' }}>{item.tags}</Text>
+                      <Text style={{ color: '#656565' }}>{item.tag}</Text>
                     </View>
-                    <Text style={styles.timeText}>{item.time}</Text>
+                    <Text style={styles.timeText}>{item.createdAt.toLocaleString()}</Text>
                     {/* <Text style={styles.timeText}>{getRelativeTime(item.time)}</Text> */}
                   </View>
                   <View style={styles.notificationContent}>
-                    <Text style={styles.h6}>{item.message}</Text>
+                    <Text style={styles.h6}>{item.body}</Text>
                     <Pressable onPress={() => handleDeleteNotification(index)}>
-                      {item.tags === 'Mess reported' ? (
+                      {item.tag === NotificationTag.MESS ? (
                         <View style={styles.claimButton}>
-            <Text style={{ color: 'white' }}>Claim</Text>
+            <Text style={{ color: 'white' }}>Claim</Text> 
                 </View>
               ) : (
                 <Text style={{ fontSize: 22 }}> </Text>

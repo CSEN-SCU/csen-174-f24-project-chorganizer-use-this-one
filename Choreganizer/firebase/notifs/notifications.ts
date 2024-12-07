@@ -1,5 +1,5 @@
 import {db} from "../firebaseConfig";
-import {collection, addDoc, query, where, getDocs, CollectionReference, doc, QueryFieldFilterConstraint, getDoc, setDoc, updateDoc, onSnapshot, or } from "firebase/firestore";
+import {collection, addDoc, query, where, getDocs, CollectionReference, doc, getDoc, setDoc, updateDoc, onSnapshot } from "firebase/firestore";
 import { NotificationTemplate, NotificationConverter, NotificationTag } from "../types/notification";
 
 const getHomeByUserId = (userId: string) => {
@@ -12,7 +12,7 @@ export function getNotificationCollection(user_id : string): CollectionReference
 
 export const addNotification = async (data: NotificationTemplate): Promise<string> => {
   try {
-    const collectionRef = await getNotificationCollection(data.receiverId);
+    const collectionRef = getNotificationCollection(data.receiverId);
     const docRef = await addDoc(collectionRef, data);
     console.log('Notification added with ID:', docRef.id);
     return docRef.id;
