@@ -19,7 +19,7 @@ async function createHouse(houseName) {
         await updateDoc(docRef, { id: docRef.id });
         console.log("House created successfully with docRef of ", docRef);
 
-        const userRef = collection(db, "users");//, user.uid);
+        const userRef = collection(db, "users");
         userQuery = query(userRef, where("uid", "==", user.uid));
         const userCheck = await getDocs(userQuery);
         const correct = userCheck.docs[0].ref;
@@ -36,48 +36,6 @@ async function createHouse(houseName) {
     }
 }
 
-// Invite users to a house
-// async function inviteUserToHouse(houseId, invitedEmails) {
-//     try {
-//         //console.log("the house id is, ", houseId);
-//         const houseRef = collection(db, "houses");
-//         const houseQuery = query(houseRef, where("id", "==", houseId))
-//         const houseData1 = await getDocs(houseQuery);
-
-//         if (houseData1.empty) {
-//             throw new Error(`House with ID ${houseId} does not exist.`);
-//         }
-
-//         const houseData = houseData1.docs[0];
-
-//         if (!houseData.exists()) {
-//             throw new Error(`House with ID ${houseId} does not exist.`);
-//         }
-
-//         console.log("HIII", invitedEmails);
-//         const sendEmail = httpsCallable(functions, "sendEmail");
-
-//         for (const invitee of invitedEmails) {
-//             const joinCode = Math.floor(1000 + Math.random() * 9000);
-
-//             // Update Firestore with invitation data
-//             await updateDoc(houseRef, {
-//                 invitations: arrayUnion(invitee),
-//                 invitationCodes: arrayUnion(joinCode),
-//             });
-
-//             // Call the Cloud Function to send an email
-//             const result = await sendEmail({
-//                 email: invitee,
-//                 joinCode: joinCode,
-//             });
-
-//             console.log(`Email sent to ${invitee}:`, result.data);
-//         }
-//     } catch (error) {
-//         console.error("Error inviting user to house:", error);
-//     }
-// }
 async function inviteUserToHouse(houseId, invitedEmails) {
     try {
         const houseRef = collection(db, "houses");
@@ -88,12 +46,8 @@ async function inviteUserToHouse(houseId, invitedEmails) {
             throw new Error(`House with ID ${houseId} does not exist.`);
         }
 
-        const houseData = houseData1.docs[0]; // First document
-        
-        console.log("2", houseData.data()); //this works!
-
+        const houseData = houseData1.docs[0];
         const sendEmail = httpsCallable(functions, "sendEmail");
-
         console.log("here!");
 
         for (const invitee of invitedEmails) {
