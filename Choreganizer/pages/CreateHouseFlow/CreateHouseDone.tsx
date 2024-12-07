@@ -8,7 +8,7 @@ import {
   Pressable,
 } from 'react-native';
 import {house} from './CreateHouseName'
-import { assignChorestoUsers } from '../../firebase/firebaseConfig';
+import { assignChorestoUsers, assignChorestoHouse } from '../../firebase/firebaseConfig';
 
 function CreateHouseDone({navigation}: {navigation: any}): React.JSX.Element {
 
@@ -16,6 +16,7 @@ function CreateHouseDone({navigation}: {navigation: any}): React.JSX.Element {
   const assignChores = async () =>{
     console.log("assinging chores to the users ");
     await assignChorestoUsers(house.id);
+    await assignChorestoHouse(house.id);
   }
 
   return (
