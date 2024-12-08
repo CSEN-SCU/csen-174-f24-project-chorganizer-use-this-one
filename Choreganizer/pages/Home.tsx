@@ -82,6 +82,7 @@ useEffect(() => {
             return {
               name: housemate.name,
               chores: userChoreData,
+              id: housemate.id
             };
           })
         );
