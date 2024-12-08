@@ -1,24 +1,35 @@
 import {db} from "../firebaseConfig";
-import {collection, addDoc, query, where, getDocs, CollectionReference, doc, getDoc, setDoc, updateDoc, onSnapshot } from "firebase/firestore";
+import {collection, query, where, CollectionReference, doc, getDoc, setDoc, updateDoc, onSnapshot } from "firebase/firestore";
 import { NotificationTemplate, NotificationConverter, NotificationTag } from "../types/notification";
 import { getFunctions, httpsCallable } from "firebase/functions";
 
 const functions = getFunctions();
 
-const getHouseByUserId = async(userId: string) => {
+/**
+ * Get the house ID associated with a given user ID.
+ * @param {string} userId - The ID of the user whose house ID is being queried.
+ * @returns {Promise<string | null>} A promise that resolves to the house ID if one exists, or null if no house ID is associated with the given user ID.
+ */
+const getHouseByUserId = async(userId: string): Promise<string | null> => {
   try {
-  const userDoc = await getDoc(doc(db, "users", userId));
-  if (!userDoc.exists()) {
-    throw new Error("No such user");
-  }
-  const userData = userDoc.data();
-  const house_id = userData?.house_id;
-  if (!house_id) {
-    console.error(`No house_id found for user with ID: ${userId}`);
-    return null;
-  }
-  return house_id.toString();
+    // Get the user document
+    const userDoc = await getDoc(doc(db, "users", userId));
+    if (!userDoc.exists()) {
+      // If the user document doesn't exist, throw an error
+      throw new Error("No such user");
+    }
+    // Get the house ID associated with the user
+    const userData = userDoc.data();
+    const house_id = userData?.house_id;
+    if (!house_id) {
+      // If the house ID doesn't exist, log an error and return null
+      console.error(`No house_id found for user with ID: ${userId}`);
+      return null;
+    }
+    // Return the house ID as a string
+    return house_id.toString();
   } catch (e) {
+    // If there's an error, log it and rethrow it
     console.error("Error getting house by user id: ", e);
     throw e;
   }
@@ -28,10 +39,34 @@ export function getNotificationCollection(user_id : string): CollectionReference
   return collection(db, `users/${user_id}/notifications`).withConverter(NotificationConverter);
 }
 
-export const addNotification = async (data: NotificationTemplate): Promise<string> => {
+/**
+ * Add a new notification for a user with a specific chore.
+ * @param {string} user_id - The ID of the user to receive the notification.
+ * @param {string} chore_id - The ID of the chore associated with the notification.
+ * @param {string} chore_descr - A description of the chore.
+ * @returns {Promise<string>} A promise that resolves to the ID of the added notification.
+ */
+export const addNotification = async (user_id: string, chore_id: string, chore_descr: string): Promise<string> => {
   try {
-    const collectionRef = getNotificationCollection(data.receiverId);
-    const docRef = await addDoc(collectionRef, data);
+    // Get the notification collection reference for the user
+    const collectionRef = getNotificationCollection(user_id);
+    // Create a document reference in the collection
+    const docRef = doc(collectionRef);
+
+    // Define the notification data using the NotificationTemplate
+    const notification: NotificationTemplate = {
+      id: docRef.id,
+      tag: NotificationTag.BUMP,
+      choreId: chore_id,
+      title: "New Bump!",
+      body: "Bump: " + chore_descr,
+      receiverId: user_id,
+      read: false,
+      createdAt: new Date(),
+    };
+
+    // Save the notification document to Firestore
+    await setDoc(docRef, notification);
     console.log('Notification added with ID:', docRef.id);
     return docRef.id;
   } catch (error) {
@@ -153,6 +188,27 @@ export const emailMessNotification = async (user_id: string, report_text: string
   }
 };
 
+export const sendBumpNotification = async (receiver_id: string, chore_descr : string) => {
+  try {
+    const email = await getEmailByUserId(receiver_id);
+    const sendEmailNotification = httpsCallable(functions, "sendEmailNotification");
+  
+    const emailNotification = {
+      to: email,
+      subject: "You got a bump!",
+      text: "A roommate has bumped you for the chore: " + chore_descr,
+    };
+    console.log("Sending payload",emailNotification)
+
+    // Call Firebase function
+    const response = await sendEmailNotification(emailNotification);
+    console.log(`Email sent successfully: ${response.data}`);
+    
+  }catch (error) {
+    console.error(`Error sending email to ${receiver_id} notifications:`, error);
+  }
+  
+}
 
 /**
  * Listens for unread notifications of a user in real-time and updates the provided state.

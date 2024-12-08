@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { reportMess } from '../firebase/report-mess/reportMess';
 import {auth} from '../firebase/firebaseConfig';
-import { addMessNotification, emailMessNotification} from '../firebase/notifs/notifications.ts';
+import { addMessNotification, emailMessNotification, sendBumpNotification, addNotification} from '../firebase/notifs/notifications.ts';
 
 interface Chore {
   title: string;
@@ -193,8 +193,15 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
                         <Text style={styles.choreDays}>{chore.daysLeft} days left</Text>
                         <Text style={styles.choreTitle}>{chore.title}</Text>
                       </View>
-                      <TouchableOpacity style={styles.fistBumpButton}>
+                      <TouchableOpacity onPress={() => {
+                        addNotification(auth.currentUser!.uid, housemates[currentChoreIndex].name, chore.title)
+                        // TODO: change the email to be the receiver user's email
+                        sendBumpNotification(auth.currentUser!.uid, chore.title)
+                        Alert.alert(`${housemates[currentChoreIndex].name} has been bumped!`);
+
+                      }} style={styles.fistBumpButton}>
                         <Text style={styles.fistBumpIcon}>👊</Text>
+
                       </TouchableOpacity>
                 </View>
                   ))

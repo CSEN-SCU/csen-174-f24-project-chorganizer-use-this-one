@@ -16,7 +16,7 @@ const getHouseByUserId = async(userId: string) => {
     }
   }
 export const reportMess = async (reporterUserId: string, message: string | null) => {
-    const home_id = getHouseByUserId(reporterUserId);
+    const home_id = await getHouseByUserId(reporterUserId);
     const messesCollectionRef = collection(db, `houses/${home_id}/messes`);
     const docRef = doc(messesCollectionRef);
     const mess: MessReportTemplate = { id: docRef.id, message: message, createdAt: new Date(), claimerUserId: null, reporterUserId: reporterUserId }
@@ -31,7 +31,7 @@ export const reportMess = async (reporterUserId: string, message: string | null)
 }
 
 export const claimMess = async (mess_id: string, claimerUserId: string) => {
-    const home_id = getHouseByUserId(claimerUserId);
+    const home_id = await getHouseByUserId(claimerUserId);
     console.log(home_id, claimerUserId)
     const docRef = doc(collection(db, `houses/${home_id}/messes`), mess_id);
     try {
@@ -46,7 +46,7 @@ export const claimMess = async (mess_id: string, claimerUserId: string) => {
 }
 
 export const getAllMessReports = async (user_id: string): Promise<MessReportTemplate[]> => {
-    const home_id = getHouseByUserId(user_id);
+    const home_id = await getHouseByUserId(user_id);
     const messesCollectionRef = collection(db, `houses/${home_id}/messes`).withConverter(MessReportConverter);
 
     // Fetch all reported messes for this home
@@ -56,7 +56,7 @@ export const getAllMessReports = async (user_id: string): Promise<MessReportTemp
     return messes
 }
 export const getMessReport = async (user_id: string, mess_id: string): Promise<MessReportTemplate> => {
-    const home_id = getHouseByUserId(user_id);
+    const home_id = await getHouseByUserId(user_id);
     const messRef = doc(db, `houses/${home_id}/messes/${mess_id}`).withConverter(MessReportConverter);
     try {
         const mess = await getDoc(messRef);
