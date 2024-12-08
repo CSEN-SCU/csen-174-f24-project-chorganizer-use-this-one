@@ -5,10 +5,7 @@ import { SignUpNewUser, SignInUser, toggleNotifs, getUserInfo } from "./users/us
 import { createRoom, assignChorestoRooms, assignUser } from "./rooms/rooms.js";
 import { createHouse, inviteUserToHouse, verifyInvite, getHousemates } from './houses/houses.js';
 import { createChore, assignChorestoUsers, checkDueDate, updateStatus, getXUsersChoreData, getXUsersChoreDataPersonal } from './chores/chores.js';
-
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
+import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -26,5 +23,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+const functions = getFunctions(app);
+connectFunctionsEmulator(functions,"127.0.0.1",5001);
 
 export { app, auth, db, SignUpNewUser, SignInUser, getUserInfo, createHouse, inviteUserToHouse, verifyInvite, getHousemates, toggleNotifs, createChore, assignChorestoUsers, checkDueDate, updateStatus, createRoom, assignChorestoRooms, assignUser, getXUsersChoreData, getXUsersChoreDataPersonal };

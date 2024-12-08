@@ -37,6 +37,7 @@ import {
     
     return ((await getDoc(docRef)).data());
   })*/
+
 export const SignUpNewUser = async (email, password, displayName) => {
   try {
     // Create a new user with email and password
@@ -88,7 +89,7 @@ export const SignInUser = async (email, password) => {
     console.log('User sign-in succeeded', user); // Query the "users" collection for the signed-in user's data
 
     const usersRef = collection(db, 'users');
-    const q = query(usersRef, where('uid', '==', user.uid)); // Use `uid` instead of `id`
+    const q = query(usersRef, where('uid', '==', user?.uid)); // Use `uid` instead of `id`
     const querySnapshot = await getDocs(q);
 
     if (!querySnapshot.empty) {
@@ -106,7 +107,7 @@ export const SignInUser = async (email, password) => {
     }
   } catch (error) {
     console.error('Error signing in:', error.code, error.message);
-    throw error; // Re-throw the error for upstream handling
+    throw error;
   }
 };
 
@@ -124,18 +125,20 @@ export const toggleNotifs = async () => {
   }
 };
 
-export const getUserInfo = async (userId: string) => {
+export const getUserInfo = async (userID) => { // takes uid
   try {
-    const docRef = doc(db, 'users', userId);
-    const query = await getDoc(docRef);
-    return query.data();
+    const userRef = collection(db, 'users');
+    const userQuery = query(userRef, where('uid', '==', userID));
+    const userCheck = await getDocs(userQuery);
+    const correct = userCheck.docs[0];
+    return correct.data();
   } catch (error) {
     console.error('Error getting user info:', error);
     throw error;
   }
 };
 
-export const getHouseIdByUser = async (userId: string) => {
+export const getHouseIdByUser = async (userId: string) => { // takes id
   try {
     const docRef = doc(db, 'users', userId);
     const query = await getDoc(docRef);

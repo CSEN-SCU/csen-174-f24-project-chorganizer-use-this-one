@@ -9,7 +9,7 @@ async function createHouse(houseName) {
     try {
         const user = auth.currentUser;
         const usersRef = collection(db, 'users');
-        const q = query(usersRef, where('uid', '==', user.uid));
+        const q = query(usersRef, where('uid', '==', user?.uid));
         const querySnapshot = await getDocs(q);
         const userData = querySnapshot.docs[0].data();
         const userRef = querySnapshot.docs[0].ref;
@@ -70,7 +70,7 @@ async function verifyInvite(houseId, joinCode) {
     try {
         const user = auth.currentUser;
         const usersRef = collection(db, 'users');
-        const q = query(usersRef, where('uid', '==', user.uid));
+        const q = query(usersRef, where('uid', '==', user?.uid));
         const querySnapshot = await getDocs(q);
         const userData = querySnapshot.docs[0].data();
         const userRef = querySnapshot.docs[0].ref;
