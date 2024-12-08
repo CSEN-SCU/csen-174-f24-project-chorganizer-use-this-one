@@ -1,4 +1,4 @@
-import { collection, addDoc, getDoc, getDocs, doc, updateDoc, arrayUnion, query, where } from "firebase/firestore";
+import { collection, addDoc, getDoc, getDocs, doc, updateDoc, arrayUnion, query, where, runTransaction } from "firebase/firestore";
 import { auth, db } from "../firebaseConfig";
 import { getFunctions, httpsCallable } from "firebase/functions";
 
@@ -19,12 +19,11 @@ async function createHouse(houseName) {
             invitations: [],
             invitationCodes: [],
             rooms: [],
+            head_user: userData.id,
+            members: [userData.id]
         });
-        await updateDoc(docRef, { id: docRef.id });
-        await updateDoc(docRef, { head_user: userData.id });
-        await updateDoc(docRef, { members: arrayUnion(userData.id) });
         console.log("House created successfully with docRef of ", docRef);
-
+        await updateDoc(docRef, { id: docRef.id });
         await updateDoc(userRef, {house_id: docRef.id});
         return (await getDoc(docRef)).data();
     } catch (error) {
@@ -36,27 +35,22 @@ async function createHouse(houseName) {
 async function inviteUserToHouse(houseId, invitedEmails) {
     try {
         const houseRef = doc(db, "houses", houseId);
-        const houseSnap = await getDoc(houseRef);
-
-        if (!houseSnap.exists()) {
-            throw new Error(`House with ID ${houseId} does not exist.`);
-        }
-
-        const houseData = houseSnap.data();
         const sendEmailNotification = httpsCallable(functions, 'sendEmailNotification');
         for (const invitee of invitedEmails) {
             const joinCode = Math.floor(1000 + Math.random() * 9000);
 
             console.log("Updating Firestore for invitee:", invitee);
-            // Update Firestore with invitation data
-            await updateDoc(houseData.ref, {
-                invitations: arrayUnion(invitee),
-                invitationCodes: arrayUnion(joinCode),
-            });
+            // Update Firestore with invitation data
+            await db.runTransaction(async (transaction) => {
+                transaction.update(houseRef, {
+                    invitations: arrayUnion(invitee),
+                    invitationCodes: arrayUnion(joinCode),
+                });
+            });
             console.log("Firestore updated successfully for:", invitee);
-            const emailText = 'Your join code is: ${joinCode}';
+            const emailText = `Your join code is: ${joinCode}`;
             // Send email notification
-            await sendEmailNotification({ to: invitee, subject: "Join Your House!", text: emailText });
+            const result = await sendEmailNotification({ to: invitee, subject: "Join Your House!", text: emailText });
 
             console.log(`Email sent to ${invitee}:`, result.data);
         }
@@ -75,30 +69,31 @@ async function verifyInvite(houseId, joinCode) {
         const userData = querySnapshot.docs[0].data();
         const userRef = querySnapshot.docs[0].ref;
         const houseRef = doc(db, "houses", houseId);
-        const houseData = await getDoc(houseRef);
+        await db.runTransaction(async (transaction) => {
+            const houseSnap = await transaction.get(houseRef);
 
-        if (!houseData.exists()) {
-            throw new Error(`House with ID ${houseId} does not exist.`);
-        }
+            if (!houseSnap.exists()) {
+                throw new Error(`House with ID ${houseId} does not exist.`);
+            }
 
-        const data = houseData.data();
-        const index = data.invitations.indexOf(userData.email);
+            const data = houseSnap.data();
+            const index = data.invitations.indexOf(userData.email);
 
-        if (index >= 0 && data.invitationCodes[index] === joinCode) {
-            // Update Firestore with new member and clear invitation
-            await updateDoc(houseRef, {
-                members: arrayUnion(userData.id),
-                invitations: data.invitations.filter((_, i) => i !== index),
-                invitationCodes: data.invitationCodes.filter((_, i) => i !== index),
-            });
+            if (index >= 0 && data.invitationCodes[index] === joinCode) {
+                const updatedInvitations = data.invitations.filter((_, i) => i !== index);
+                const updatedCodes = data.invitationCodes.filter((_, i) => i !== index);
 
-            // Link the user to the house in Firestore
-            await updateDoc(userRef, { house_id: houseId });
+                transaction.update(houseRef, {
+                    members: arrayUnion(userData.id),
+                    invitations: updatedInvitations,
+                    invitationCodes: updatedCodes,
+                });
 
-            console.log("User successfully added to house");
-        } else {
-            throw new Error("Invalid join code or email not invited.");
-        }
+                transaction.update(userRef, { house_id: houseId });
+            } else {
+                throw new Error("Invalid join code or email not invited.");
+            }
+        });
     } catch (error) {
         console.error("Error verifying invite:", error);
     }

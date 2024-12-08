@@ -2,7 +2,6 @@ import {auth, db} from '../firebaseConfig';
 import {
   collection,
   doc,
-  setDoc,
   getDoc,
   getDocs,
   query,
@@ -119,7 +118,7 @@ export const toggleNotifs = async () => {
     const querySnapshot = await getDocs(q);
     const userData = querySnapshot.docs[0].data();
     const userRef = querySnapshot.docs[0].ref;
-    setDoc(userRef, {notifBool: !userData.notifBool});
+    await updateDoc(userRef, {notifBool: !userData.notifBool});
   } catch (error) {
     console.error('Error toggling notifications:', error);
   }
