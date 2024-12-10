@@ -163,8 +163,8 @@ async function redistributeChores(houseId) {
     console.error('Error redistributing chores! Error: ', error);
   }
 }
-/* //THIS WORKS!!!!!
-async function redistributeChores(houseId) {
+
+async function newSignintoHouseSwapChores(houseId) {
   try {
     const userRef = collection(db, 'users');
     const choreRef = collection(db, 'chores');
@@ -230,7 +230,7 @@ async function redistributeChores(houseId) {
   }
 } 
 //END OF WORKING REDISTRIBUTE CHORES
-*/
+
   /*try {
     const userRef = collection(db, 'users');
     const choreRef = collection(db, 'chores');
@@ -396,6 +396,7 @@ export {
   getXUsersChoreData,
   getXUsersChoreDataPersonal,
   redistributeChores,
+  newSignintoHouseSwapChores,
 };
 
 [
