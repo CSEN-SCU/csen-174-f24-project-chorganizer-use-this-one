@@ -37,6 +37,7 @@ import {
     
     return ((await getDoc(docRef)).data());
   })*/
+
 export const SignUpNewUser = async (email, password, displayName) => {
   try {
     // Create a new user with email and password
@@ -148,6 +149,8 @@ export const SignInUser = async (email, password) => {
   }
 };
 
+//arran func
+/*
 export const toggleNotifs = () => {
   try {
     const user = auth.currentUser;
@@ -157,8 +160,24 @@ export const toggleNotifs = () => {
   } catch (error) {
     console.error('Error toggling notifications:', error);
   }
+};*/
+
+//kelly func
+export const toggleNotifs = async () => {
+  try {
+    const user = auth.currentUser;
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('uid', '==', user?.uid));
+    const querySnapshot = await getDocs(q);
+    const userData = querySnapshot.docs[0].data();
+    const userRef = querySnapshot.docs[0].ref;
+    await updateDoc(userRef, {notifBool: !userData.notifBool});
+  } catch (error) {
+    console.error('Error toggling notifications:', error);
+  }
 };
 
+//arran func
 export const getUserInfo = async (userID) => {
   try {
     const userRef = collection(db, 'users'); //, user.uid);
@@ -173,6 +192,22 @@ export const getUserInfo = async (userID) => {
   }
 };
 
+//kelly func
+/*export const getUserInfo = async (userID) => { // takes uid
+  try {
+    const userRef = collection(db, 'users');
+    const userQuery = query(userRef, where('uid', '==', userID));
+    const userCheck = await getDocs(userQuery);
+    const correct = userCheck.docs[0];
+    return correct.data();
+  } catch (error) {
+    console.error('Error getting user info:', error);
+    throw error;
+  }
+};*/
+
+//arran func
+/*
 export const getHouseIdByUser = (userId: string) => {
   try {
     const docRef = doc(db, 'users', userId);
@@ -181,7 +216,19 @@ export const getHouseIdByUser = (userId: string) => {
     console.error('Error getting house id by user:', error);
     throw error;
   }
+};*/
+//kelly func
+export const getHouseIdByUser = async (userId: string) => { // takes id
+  try {
+    const docRef = doc(db, 'users', userId);
+    const query = await getDoc(docRef);
+    return query.data()?.house_id;
+  } catch (error) {
+    console.error('Error getting house id by user:', error);
+    throw error;
+  }
 };
+
 /*import { auth, db } from '../firebaseConfig';
 import { collection, doc, setDoc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";

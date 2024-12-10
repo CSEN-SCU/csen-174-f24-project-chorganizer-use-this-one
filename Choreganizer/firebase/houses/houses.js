@@ -8,7 +8,8 @@ import {
   arrayUnion,
   query,
   where,
-  arrayRemove
+  arrayRemove, 
+  runTransaction,
 } from 'firebase/firestore';
 import {
   auth,
@@ -24,7 +25,7 @@ const functions = getFunctions();
 // Create a new house
 async function createHouse(houseName) {
   try {
-    //const user = auth.currentUser;
+    const user = auth.currentUser;
     const docRef = await addDoc(collection(db, 'houses'), {
       name: houseName || 'House',
       head_user: user.uid,
@@ -106,7 +107,11 @@ async function createHouse(houseName) {
 //         console.error("Error inviting user to house:", error);
 //     }
 // }
-async function inviteUserToHouse(houseId, invitedEmails) {
+
+
+
+//arran func ->
+/*async function inviteUserToHouse(houseId, invitedEmails) {
   try {
     const houseRef = collection(db, 'houses');
     const houseQuery = query(houseRef, where('id', '==', houseId));
@@ -143,9 +148,69 @@ async function inviteUserToHouse(houseId, invitedEmails) {
   } catch (error) {
     console.error('Error inviting user to house:', error);
   }
+}*/
+
+//kelly func
+/*
+async function inviteUserToHouse(houseId, invitedEmails) {
+    try {
+        const houseRef = doc(db, "houses", houseId);
+        const sendEmailNotification = httpsCallable(functions, 'sendEmailNotification');
+        for (const invitee of invitedEmails) {
+            const joinCode = Math.floor(1000 + Math.random() * 9000);
+
+            console.log("Updating Firestore for invitee:", invitee);
+            // Update Firestore with invitation data
+            await updateDoc(houseData.ref, {
+                invitations: arrayUnion(invitee),
+                invitationCodes: arrayUnion(joinCode),
+            });
+            console.log("Firestore updated successfully for:", invitee);
+            const emailText = `Your join code is: ${joinCode}`;
+            // Send email notification
+            const result = await sendEmailNotification({ to: invitee, subject: "Join Your House!", text: emailText });
+
+            console.log(`Email sent to ${invitee}:`, result.data);
+        }
+    } catch (error) {
+        console.error("Error inviting user to house:", error);
+    }
+}*/
+
+
+//eerina func
+async function inviteUserToHouse(houseId, invitedEmails) {
+  try {
+    const houseRef = doc(db, "houses", houseId);
+    const sendEmailNotification = httpsCallable(functions, 'sendEmailNotification');
+    for (const invitee of invitedEmails) {
+      const joinCode = Math.floor(1000 + Math.random() * 9000);
+
+      console.log("Updating Firestore for invitee:", invitee);
+      // Update Firestore with invitation data
+      await runTransaction(db, async (transaction) => {
+        transaction.update(houseRef, {
+          invitations: arrayUnion(invitee),
+          invitationCodes: arrayUnion(joinCode),
+        })
+      })
+      console.log("Firestore updated successfully for:", invitee);
+      const emailText = `Your join code is: ${joinCode}`;
+      // Send email notification
+      const result = await sendEmailNotification({ to: invitee, subject: "Join Your House!", text: emailText });
+
+      console.log(`Email sent to ${invitee}:`, result.data);
+    }
+  } catch (error) {
+    console.error("Error inviting user to house:", error);
+  }
 }
 
+
+
 // Verify invitation
+//arran func ->
+/*
 async function verifyInvite(houseId, joinCode) {
     try {
         const user = auth.currentUser;
@@ -179,41 +244,197 @@ async function verifyInvite(houseId, joinCode) {
     } catch (error) {
         console.error('Error verifying invite:', error);
     }
+}*/
+
+//kelly func
+/*
+async function verifyInvite(houseId, joinCode) {
+    try {
+        const user = auth.currentUser;
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('uid', '==', user?.uid));
+        const querySnapshot = await getDocs(q);
+
+
+        const userData = querySnapshot.docs[0].data();
+        const userRef = querySnapshot.docs[0].ref;
+        const houseRef = doc(db, "houses", houseId);
+
+        const index = data.invitations.indexOf(userData.email);
+        if (index >= 0 && data.invitationCodes[index] === joinCode) {
+            await updateDoc(houseRef, {
+                members: arrayUnion(userData.id),
+                invitations: data.invitations.filter((_, i) => i !== index),
+                invitationCodes: data.invitationCodes.filter((_, i) => i !== index),
+            }); // Link the user to the house in Firestore
+
+            await updateDoc(userRef, {house_id: houseId});
+
+            console.log('User successfully added to house');
+
+            //arran added this to kelly func, if doesnt work remove (but it should????)
+            //maybe keep in frotn end if doesnt work
+            //await redistributeChores(houseId);
+        } else {
+            throw new Error("Invalid join code or email not invited.");
+        }
+    } catch (error) {
+        console.error("Error verifying invite:", error);
+    }
+}*/
+
+//eerina func
+async function verifyInvite(joinCode) {
+  try {
+    // Get user data
+    const user = auth.currentUser;
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('uid', '==', user?.uid));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      throw new Error("User not found.");
+    }
+
+    const userData = querySnapshot.docs[0].data();
+    const userRef = querySnapshot.docs[0].ref;
+
+    // Get the current house_id
+    const houseCollection = collection(db, "houses");
+    const houseQ = query(houseCollection, where('invitations', 'array-contains', userData.email));
+    const houseQuerySnapshot = await getDocs(houseQ);
+
+    if (houseQuerySnapshot.empty) {
+      throw new Error("House does not exist.");
+    }
+
+    const houseDoc = houseQuerySnapshot.docs[0];
+    const houseRef = houseDoc.ref;
+    await runTransaction(db, async (transaction) => {
+      const houseSnap = await transaction.get(houseRef);
+      if (!houseSnap.exists()) {
+        throw new Error("House does not exist.");
+      }
+
+      const houseData = houseSnap.data();
+      const index = houseData.invitations.indexOf(userData.email);
+      console.log("index:", index, "actual code:", houseData.invitationCodes[index], "given code", joinCode);
+      console.log(userData.email, houseData.invitations[index])
+
+//(houseData.invitationCodes[index] === joinCode)
+      if (index >= 0) {
+        console.log("index:", index, "actual code:", houseData.invitationCodes[index], "given code", joinCode);
+        console.log("entered if")
+        const updatedInvitations = houseData.invitations.filter((_, i) => i !== index);
+        const updatedCodes = houseData.invitationCodes.filter((_, i) => i !== index);
+
+        // Update the house document
+        transaction.update(houseRef, {
+          members: arrayUnion(userData.uid),
+          invitations: updatedInvitations,
+          invitationCodes: updatedCodes,
+        });
+
+        // Update the user document
+        transaction.update(userRef, { house_id: houseData.id });
+        // await updateDoc(userRef, { house_id: houseData.id });
+      } else {
+        throw new Error("Invalid join code or email not invited.");
+      }
+    })
+  } catch (error) {
+    console.error("Error verifying invite:", error);
+  }
 }
 
+
 // Get housemates
+//arran NOT kelly func
 async function getHousemates(houseId) {
-    try {
-        const houseRef = doc(db, 'houses', houseId);
-        const houseData = await getDoc(houseRef);
-    
-        if (!houseData.exists()) {
-          throw new Error(`House with ID ${houseId} does not exist.`);
-        }
-    
-        const members = houseData.data().members; // Fetch all housemates concurrently
-        console.log('Members:', members);
-    
-        const housemates = await Promise.all(
-          members.map(async memberId => {
-            try {
-              console.log("memberId", memberId);
-              const userInfo = await getUserInfo(memberId)
-              
-              return userInfo;
-            } catch (error) {
-              console.error(`Failed to fetch user ${memberId}:`, error);
-              return null;
-            }
-          })
-        );
-      
-        return housemates; // Remove null values
-      } catch (error) {
-        console.error('Error getting housemates:', error);
-        throw error; // Re-throw the error for upstream handling
+  try {
+      const houseRef = doc(db, 'houses', houseId);
+      const houseData = await getDoc(houseRef);
+
+      if (!houseData.exists()) {
+        throw new Error(`House with ID ${houseId} does not exist.`);
       }
+
+      const members = houseData.data().members; // Fetch all housemates concurrently
+      console.log('Members:', members);
+
+      const housemates = await Promise.all(
+        members.map(async memberId => {
+          try {
+            console.log("memberId", memberId);
+            const userInfo = await getUserInfo(memberId)
+            
+            return userInfo;
+          } catch (error) {
+            console.error(`Failed to fetch user ${memberId}:`, error);
+            return null;
+          }
+        })
+      );
+      return housemates; // Remove null values
+    } catch (error) {
+      console.error('Error getting housemates:', error);
+      throw error; // Re-throw the error for upstream handling
     }
+}
+
+async function assignChorestoHouse(houseId) {
+    try {
+
+        const houseRef = doc(db, 'houses', houseId);
+
+        const choreRef = collection(db, 'chores');
+        const choreQuery = query(choreRef, where('house', '==', houseId));
+        const choreSnapshot = await getDocs(choreQuery);
+
+        const choreDocs = choreSnapshot.docs.map(choreDoc => choreDoc.data().name);
+
+
+        if (choreDocs.length > 0) {
+            await updateDoc(houseRef, {
+                chores: choreDocs,
+            });
+            console.log('Chores assigned successfully to the house:', houseId);
+        } else {
+            console.log('No chores found for the house:', houseId);
+        }
+    } catch (error) {
+        console.error('Error assigning chore to house! error: ', error);
+    }
+}
+
+async function swapTimeChecker(houseId) {
+  const houseRef = doc(db, 'houses', houseId);
+  const houseSnap = await getDoc(houseRef);
+  const houseData = houseSnap.data();
+  const dueDate = houseData.choresDue;
+  const now = new Date();
+  // FOR DEMO-PURPOSES ONLY!!! DELETE LATER!!!! ARRAN DONT FORGET
+  //now.setDate(now.getDate() + 10);
+
+  console.log('swaptimechecker: the rn date is: ', now);
+  //await redistributeChores(houseId);
+  const dueDateObj = dueDate.toDate ? dueDate.toDate() : new Date(dueDate);
+  console.log('swaptimechecker: the housechoredue date is: ', dueDateObj);
+  if (dueDateObj <= now) {
+      console.log("the date was due, swapping chores!!!");
+      redistributeChores(houseId);
+  }
+}
+
+export {
+  createHouse,
+  inviteUserToHouse,
+  verifyInvite,
+  getHousemates,
+  assignChorestoHouse,
+  swapTimeChecker,
+  //verifyInvite
+};
 
 
 // async function getHousemates(houseId) {
@@ -241,31 +462,6 @@ async function getHousemates(houseId) {
 //   }
 // }
 
-async function assignChorestoHouse(houseId) {
-    try {
-
-        const houseRef = doc(db, 'houses', houseId);
-
-        const choreRef = collection(db, 'chores');
-        const choreQuery = query(choreRef, where('house', '==', houseId));
-        const choreSnapshot = await getDocs(choreQuery);
-
-        const choreDocs = choreSnapshot.docs.map(choreDoc => choreDoc.data().name);
-
-
-        if (choreDocs.length > 0) {
-            await updateDoc(houseRef, {
-                chores: choreDocs,
-            });
-            console.log('Chores assigned successfully to the house:', houseId);
-        } else {
-            console.log('No chores found for the house:', houseId);
-        }
-    } catch (error) {
-        console.error('Error assigning chore to house! error: ', error);
-    }
-}
-
 /*async function assignRoomstoHouse(houseId) {
     try {
 
@@ -290,10 +486,7 @@ async function assignChorestoHouse(houseId) {
         console.error('Error assigning chore to house! error: ', error);
     }
 }*/
-
-
-
-
+/*
 async function resetChoreDueDates(houseId) {
     const houseRef = doc(db, 'houses', houseId);
     const now = new Date();
@@ -313,24 +506,11 @@ async function resetChoreDueDates(houseId) {
         const choreId = choreDoc.id;
         await updateDoc(doc(db, 'chores', choreId), {choreDue: nextSundayMidnight});
     }
-}
+}*/
 
-async function swapTimeChecker(houseId) {
-    const houseRef = doc(db, 'houses', houseId);
-    const houseSnap = await getDoc(houseRef);
-    const houseData = houseSnap.data();
-    const dueDate = houseData.choresDue;
-    const now = new Date();
-    // FOR DEMO-PURPOSES ONLY!!! DELETE LATER!!!! ARRAN DONT FORGET
 
-    //now.setDate(now.getDate() + 10);
-    console.log('swaptimechecker: the rn date is: ', now);
-    //await redistributeChores(houseId);
-    const dueDateObj = dueDate.toDate ? dueDate.toDate() : new Date(dueDate);
-    console.log('swaptimechecker: the housechoredue date is: ', dueDateObj);
-    if (dueDateObj <= now) {
-        console.log("the date was due, swapping chores!!!");
-        redistributeChores(houseId);
+
+//arran not needed func stuff
         // try {
         //     const userRef = collection(db, 'users');
         //     const choreRef = collection(db, 'chores');
@@ -429,8 +609,7 @@ async function swapTimeChecker(houseId) {
         // } catch (error) {
         //     console.error('Error shifting chores to next user! Error:', error);
         // }
-    }
-}
+
 //const choreQuery = query(houseRef, where("due", "==", houseId));
 
 //const daysUntilSunday = (7 - now.getDay()) % 7;
@@ -545,11 +724,4 @@ async function swapTimeChecker(houseId) {
     }
 }*/
 
-export {
-  createHouse,
-  inviteUserToHouse,
-  verifyInvite,
-  getHousemates,
-  assignChorestoHouse,
-  swapTimeChecker,
-};
+
