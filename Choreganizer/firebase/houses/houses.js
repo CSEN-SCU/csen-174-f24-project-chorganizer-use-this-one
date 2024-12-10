@@ -17,6 +17,7 @@ import {
   assignChorestoUsers,
   redistributeChores,
   getUserInfo,
+  newSignintoHouseSwapChores,
 } from '../firebaseConfig';
 import {getFunctions, httpsCallable} from 'firebase/functions';
 
@@ -247,43 +248,55 @@ async function verifyInvite(houseId, joinCode) {
 }*/
 
 //kelly func
-/*
-async function verifyInvite(houseId, joinCode) {
+async function verifyInvite(joinCode) {
     try {
         const user = auth.currentUser;
         const usersRef = collection(db, 'users');
         const q = query(usersRef, where('uid', '==', user?.uid));
         const querySnapshot = await getDocs(q);
-
-
+        if (querySnapshot.empty) {
+          throw new Error("User not found.");
+        }
+    
         const userData = querySnapshot.docs[0].data();
         const userRef = querySnapshot.docs[0].ref;
-        const houseRef = doc(db, "houses", houseId);
+//         const houseRef = doc(db, "houses", houseId);
+        const houseCollection = collection(db, "houses");
+        const houseQ = query(houseCollection, where('invitations', 'array-contains', userData.email));
+        const houseQuerySnapshot = await getDocs(houseQ);
+        if (houseQuerySnapshot.empty) {
+          throw new Error("House does not exist.");
+        }
+        const houseDoc = houseQuerySnapshot.docs[0];
+        const houseRef = houseDoc.ref;
+        if (!houseDoc) {
+          throw new Error("House document does not exist")
+        }
+        const houseData = houseDoc.data()
 
-        const index = data.invitations.indexOf(userData.email);
-        if (index >= 0 && data.invitationCodes[index] === joinCode) {
+        const index = houseData.invitations.indexOf(userData.email);
+
+        if (index >= 0 ){//&& houseData.invitationCodes[index] === joinCode) {
             await updateDoc(houseRef, {
-                members: arrayUnion(userData.id),
-                invitations: data.invitations.filter((_, i) => i !== index),
-                invitationCodes: data.invitationCodes.filter((_, i) => i !== index),
+                members: arrayUnion(userData.uid),
+                invitations: houseData.invitations.filter((_, i) => i !== index),
+                invitationCodes: houseData.invitationCodes.filter((_, i) => i !== index),
             }); // Link the user to the house in Firestore
-
-            await updateDoc(userRef, {house_id: houseId});
-
+            await updateDoc(userRef, {house_id: houseData.id});
             console.log('User successfully added to house');
-
             //arran added this to kelly func, if doesnt work remove (but it should????)
             //maybe keep in frotn end if doesnt work
-            //await redistributeChores(houseId);
+            await newSignintoHouseSwapChores(houseId);
         } else {
             throw new Error("Invalid join code or email not invited.");
         }
     } catch (error) {
         console.error("Error verifying invite:", error);
     }
-}*/
+}
 
 //eerina func
+/*
 async function verifyInvite(joinCode) {
   try {
     // Get user data
@@ -310,7 +323,7 @@ async function verifyInvite(joinCode) {
 
     const houseDoc = houseQuerySnapshot.docs[0];
     const houseRef = houseDoc.ref;
-    await runTransaction(db, async (transaction) => {
+    //await runTransaction(db, async (transaction) => {
       const houseSnap = await transaction.get(houseRef);
       if (!houseSnap.exists()) {
         throw new Error("House does not exist.");
@@ -336,17 +349,24 @@ async function verifyInvite(joinCode) {
         });
 
         // Update the user document
-        transaction.update(userRef, { house_id: houseData.id });
-        // await updateDoc(userRef, { house_id: houseData.id });
+        //transaction.update(userRef, { house_id: houseData.id });
+
+        await updateDoc(houseRef, {
+          members: arrayUnion(userData.uid),
+          invitations: updatedInvitations,
+          invitationCodes: updatedCodes
+        });
+        await updateDoc(userRef, { house_id: houseData.id });
+        
+
       } else {
         throw new Error("Invalid join code or email not invited.");
       }
-    })
+    
   } catch (error) {
     console.error("Error verifying invite:", error);
   }
-}
-
+}*/
 
 // Get housemates
 //arran NOT kelly func
