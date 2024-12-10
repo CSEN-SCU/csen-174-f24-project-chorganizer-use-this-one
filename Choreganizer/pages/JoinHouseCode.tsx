@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, TextInput, Pressable, ImageBackground, Image, Keyboard } from 'react-native';
+import { verifyInvite } from '../firebase/firebaseConfig';
 
 function JoinHouseCode({ navigation }: { navigation: any }): React.JSX.Element {
   const [code, setCode] = useState(['', '', '', '']);
@@ -76,7 +77,8 @@ function JoinHouseCode({ navigation }: { navigation: any }): React.JSX.Element {
 
             <Pressable
               style={[styles.buttonPrimary, !isCodeComplete && styles.buttonDisabled]}
-              onPress={() => isCodeComplete && navigation.navigate('LoggedIn')}
+              onPress={() => {
+                verifyInvite(code.join('')); isCodeComplete && navigation.navigate('LoggedIn')}}
               disabled={!isCodeComplete}
             >
               <Text style={styles.buttonPrimaryText}>Join House</Text>

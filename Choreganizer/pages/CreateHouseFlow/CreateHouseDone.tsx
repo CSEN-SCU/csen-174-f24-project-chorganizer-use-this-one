@@ -7,8 +7,18 @@ import {
   Image,
   Pressable,
 } from 'react-native';
+import {house} from './CreateHouseName'
+import { assignChorestoUsers, assignChorestoHouse } from '../../firebase/firebaseConfig';
 
 function CreateHouseDone({navigation}: {navigation: any}): React.JSX.Element {
+
+
+  const assignChores = async () =>{
+    console.log("assinging chores to the users ");
+    await assignChorestoUsers(house.id);
+    await assignChorestoHouse(house.id);
+  }
+
   return (
     <View
       style={{
@@ -25,7 +35,7 @@ function CreateHouseDone({navigation}: {navigation: any}): React.JSX.Element {
           <Text style={{fontWeight: 'bold', color: 'white', fontSize: 20, textAlign: 'center'}}>House Created!</Text>
           <Text style={{fontWeight: 'bold', color: 'white', fontSize: 16, textAlign: 'center'}}>You're ready. Let’s begin be seeing what chores we have in store for you.</Text>
         </View>
-        <Pressable style={styles.buttonPrimary} onPress={()=>navigation.navigate('LoggedIn')}><Text style={styles.buttonPrimaryText}>Done</Text></Pressable>
+        <Pressable style={styles.buttonPrimary} onPress={()=> {assignChores(); navigation.navigate('LoggedIn')}}><Text style={styles.buttonPrimaryText}>Done</Text></Pressable>
       </View>
     </View>
   );

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -9,14 +9,63 @@ import {
   FlatList,
 } from 'react-native';
 import ExpandableList from '../assets/components/CollapsibleView';
-import {totalData} from '../assets/totalData';
+import {
+  getUserInfo,
+  getXUsersChoreData,
+  getXUsersChoreDataPersonal,
+  auth,
+} from '../firebase/firebaseConfig';
+import {collection, onSnapshot} from 'firebase/firestore';
+import {db} from '../firebase/firebaseConfig';
 
 function Personal({navigation}) {
-  const currentUser = totalData.currentUser;
-  const currentUserData = totalData.houseMates.find(
-    mate => mate.name === currentUser,
+  const userInfo = auth.currentUser?.uid;
+  const userName = auth.currentUser?.displayName;
+  const [userStreak, setUserStreak] = useState(0);
+  const [numChores, setNumChores] = useState(0);
+  const [currentUserChoreNames, setCurrentUserChoreNames] = useState<string[]>(
+    [],
   );
-  const chores = currentUserData?.chores;
+  const [upcomingText, setUpcomingText] = useState("");
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'chores'), snapshot => {
+      if (!userInfo) return;
+      const fetchChores = async () => {
+        try {
+          const userInfoForStreak = await getUserInfo(userInfo);
+          setUserStreak(userInfoForStreak.streak);
+
+          const chores = await getXUsersChoreDataPersonal(userInfo);
+          setCurrentUserChoreNames(chores);
+
+          if (chores.length > 0) {
+            setUpcomingText(chores[0].name + ": " + chores[0].tasks[0]?.name || 'No tasks');
+
+            let counter = 0;
+            chores.forEach(room => {
+              room.tasks.forEach((chore) => {
+                if (!chore.choreStatus) {
+                  counter++;
+                }
+              });
+            });
+
+            setNumChores(counter);
+          } else {
+            setUpcomingText('No chores available');
+            setNumChores(0);
+          }
+
+          console.log('Chores fetched successfully:', chores);
+        } catch (error) {
+          console.error('Error fetching chore data:', error);
+        }
+      };
+      fetchChores();
+    });
+    return () => {unsubscribe()};
+  }, [, userInfo]);
 
   const renderItem = ({item}) => {
     switch (item.key) {
@@ -24,8 +73,8 @@ function Personal({navigation}) {
         return (
           <View style={styles.headerContainer}>
             <View>
-              <Text style={styles.h2}>Hi, name!</Text>
-              <Text style={styles.h4}>You have x chores left</Text>
+              <Text style={styles.h2}>Hi, {userName}!</Text>
+              <Text style={styles.h4}>You have {numChores} chores left</Text>
             </View>
             <Pressable onPress={() => navigation.navigate('Notification')}>
               <Image
@@ -44,7 +93,7 @@ function Personal({navigation}) {
                 style={{marginBottom: 10}}
                 source={require('../assets/images/Streak.png')}
               />
-              <Text style={styles.h6}>X day streak</Text>
+              <Text style={styles.h6}>{userStreak} day streak</Text>
             </View>
 
             <View style={styles.upcomingBox}>
@@ -52,8 +101,7 @@ function Personal({navigation}) {
               <View style={styles.upcomingTextSection}>
                 <Text style={styles.h6}>Upcoming</Text>
                 <Text style={styles.h8}>
-                  "You have stuff to do. Witerwally go do it. 🎩" -Abraham
-                  Lincoln
+                  {upcomingText}
                 </Text>
               </View>
             </View>
@@ -62,7 +110,7 @@ function Personal({navigation}) {
       case 'chores':
         return (
           <View style={styles.expandableContainer}>
-            <ExpandableList data={chores} />
+            <ExpandableList data={currentUserChoreNames} />
           </View>
         );
       default:
