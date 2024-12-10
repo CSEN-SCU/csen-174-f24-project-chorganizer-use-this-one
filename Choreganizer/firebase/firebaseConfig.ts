@@ -7,7 +7,6 @@ import { SignUpNewUser, SignInUser, toggleNotifs, getUserInfo } from "./users/us
 import { createRoom, assignChorestoRooms, assignUser } from "./rooms/rooms.js";
 import { createHouse, inviteUserToHouse, verifyInvite, getHousemates, assignChorestoHouse, swapTimeChecker } from './houses/houses.js';
 import { createChore, assignChorestoUsers, checkDueDate, updateStatus, getXUsersChoreData, getXUsersChoreDataPersonal, redistributeChores, newSignintoHouseSwapChores } from './chores/chores.js';
-import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional

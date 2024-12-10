@@ -286,7 +286,7 @@ async function verifyInvite(joinCode) {
             console.log('User successfully added to house');
             //arran added this to kelly func, if doesnt work remove (but it should????)
             //maybe keep in frotn end if doesnt work
-            await newSignintoHouseSwapChores(houseId);
+            await newSignintoHouseSwapChores(houseData.id);
         } else {
             throw new Error("Invalid join code or email not invited.");
         }
