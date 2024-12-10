@@ -11,10 +11,14 @@ import {
   Modal,
   TextInput
 } from 'react-native';
+import { toggleNotifs } from '../firebase/firebaseConfig';
 
 function Settings({navigation}: {navigation: any}): React.JSX.Element {
   const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+  const toggleSwitch = () => {
+    setIsEnabled(previousState => !previousState);
+    toggleNotifs();
+  }
   const [modalVisible, setModalVisible] = useState(false);
   const [houseCode, onChangeHouseCode] = React.useState('');
 

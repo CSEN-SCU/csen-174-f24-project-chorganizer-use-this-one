@@ -1,8 +1,12 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp} from "firebase/app";
-import {initializeAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
+
+import { initializeApp } from 'firebase/app';
+import { getAuth } from "firebase/auth";
+import { getFirestore} from "firebase/firestore";
+import { SignUpNewUser, SignInUser, toggleNotifs, getUserInfo } from "./users/users";
+import { createRoom, assignChorestoRooms, assignUser } from "./rooms/rooms.js";
+import { createHouse, inviteUserToHouse, verifyInvite, getHousemates } from './houses/houses.js';
+import { createChore, assignChorestoUsers, checkDueDate, updateStatus, getXUsersChoreData, getXUsersChoreDataPersonal, redistributeChores, newSignintoHouseSwapChores } from './chores/chores.js';
+import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -18,9 +22,9 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = initializeAuth(app);
+const auth = getAuth(app);
 const db = getFirestore(app);
 const functions = getFunctions(app);
 connectFunctionsEmulator(functions, "127.0.0.1", 5001);
 
-export {app, auth, db};
+export { app, auth, db, SignUpNewUser, SignInUser, getUserInfo, createHouse, inviteUserToHouse, getHousemates, toggleNotifs, createChore, assignChorestoUsers, checkDueDate, updateStatus, createRoom, assignChorestoRooms, assignUser, getXUsersChoreData, getXUsersChoreDataPersonal, assignChorestoHouse, swapTimeChecker, redistributeChores,newSignintoHouseSwapChores, verifyInvite };
