@@ -11,12 +11,32 @@ import {
   Image,
 } from 'react-native';
 
+import { createHouse } from '../../firebase/firebaseConfig';
+
+let house: any;
+
 function CreateHouseName({navigation}: {navigation: any}): React.JSX.Element {
   const [houseName, onChangeHouseName] = useState('');
-  const submitUserHouseName = () => {
-    //HI BACKEND PEOPLE! this is where you submit the house name 🫀
-    console.log('submitting user info');
+  // const submitUserHouseName = () => {
+  //   const houseSnap = createHouse(houseName);
+  //   console.log("1", houseSnap);
+  //   const house = houseSnap.data();
+  //   // console.log("HELLO!", house);
+  //   // console.log('submitting house info');
+  // };
+
+  const submitUserHouseName = async () => {
+    try {
+      house = await createHouse(houseName); // Wait for the promise to resolve
+      //console.log('1', houseSnap);
+
+      //house = houseSnap?.data(); // Update the global `house` variable
+      console.log('House Data:', house); // Debugging
+    } catch (error) {
+      console.error('Error creating house:', error);
+    }
   };
+
 
   return (
     <View
@@ -64,7 +84,10 @@ function CreateHouseName({navigation}: {navigation: any}): React.JSX.Element {
             />
             <Pressable
               style={styles.buttonPrimary}
-              onPress={() => {submitUserHouseName(); navigation.navigate('Create House Members')}}>
+              onPress={async () => {
+                await submitUserHouseName();
+                navigation.navigate('Create House Members');
+              }}>
               <Text style={styles.buttonPrimaryText}>
                 {houseName.length > 0 ? 'Continue' : 'Skip'}
               </Text>
@@ -147,5 +170,7 @@ const styles = StyleSheet.create({
     paddingTop: '20%',
   },
 });
+
+export { house };
 
 export default CreateHouseName;

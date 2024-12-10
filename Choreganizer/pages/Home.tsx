@@ -12,6 +12,8 @@ import {
   TextInput,
 } from 'react-native';
 import { totalData } from '../assets/totalData';
+import { getHousemates } from '../firebase/firebaseConfig';
+import { house } from './CreateHouseFlow/CreateHouseName';
 
 interface Chore {
   title: string;
@@ -28,6 +30,9 @@ function Home({ navigation }: { navigation: any }): React.JSX.Element {
   const [modalVisible, setModalVisible] = useState(false);
   const [reportText, setReportText] = useState('');
 
+  // HI FRONTEND! use this housemates line:
+  // const housemates = getHousemates(house.id);
+  // for each housemate in housemates, you could do housemate.name, and then arran should have a get chores function for each user
   const housemates: Housemate[] = [
     {
       name: 'Olivia',
