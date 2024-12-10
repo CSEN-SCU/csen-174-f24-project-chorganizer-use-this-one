@@ -276,7 +276,7 @@ async function verifyInvite(joinCode) {
 
         const index = houseData.invitations.indexOf(userData.email);
 
-        if (index >= 0 ){//&& houseData.invitationCodes[index] === joinCode) {
+        if (index >= 0 && houseData.invitationCodes[index] === Number(joinCode)) {
             await updateDoc(houseRef, {
                 members: arrayUnion(userData.uid),
                 invitations: houseData.invitations.filter((_, i) => i !== index),
