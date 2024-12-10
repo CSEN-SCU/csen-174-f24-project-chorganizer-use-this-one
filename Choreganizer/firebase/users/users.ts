@@ -165,7 +165,7 @@ export const getUserInfo = async (userID) => {
     const userQuery = query(userRef, where('uid', '==', userID));
     const userCheck = await getDocs(userQuery);
     const correct = userCheck.docs[0];
-    console.log("666", correct.data());
+    //console.log("666", correct.data());
     return correct.data();
   } catch (error) {
     console.error('Error getting user info:', error);

@@ -10,7 +10,7 @@ import {
   ImageBackground,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {SignInUser, SignUpNewUser, swapTimeChecker} from '../firebase/firebaseConfig';
+import {SignInUser, SignUpNewUser, swapTimeChecker, assignChorestoHouse, redistributeChores} from '../firebase/firebaseConfig';
 
 function AuthScreen(): React.JSX.Element {
   const [email, setEmail] = useState('');
@@ -26,8 +26,11 @@ function AuthScreen(): React.JSX.Element {
       if (signedInUser.status === 'existingWithHouseId'){
         navigation.navigate('LoggedIn');
         const houseId= signedInUser.user?.house_id;
-        swapTimeChecker(houseId);
-        console.log("house was swap timne checker-ed!!!!!!");
+        
+        //await assignChorestoHouse(houseId);
+        await redistributeChores(houseId);
+        await swapTimeChecker(houseId);
+        //console.log("house was swap timne checker-ed!!!!!!");
       } else {
         navigation.navigate('Launch' as never);
       }

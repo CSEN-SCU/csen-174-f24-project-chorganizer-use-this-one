@@ -19,7 +19,7 @@ import {
   auth,
 } from '../firebase/firebaseConfig';
 import {collection, onSnapshot} from 'firebase/firestore';
-import {db} from '../firebase/firebaseConfig';
+import {db, redistributeChores} from '../firebase/firebaseConfig';
 
 interface Chore {
   title: string;
@@ -70,9 +70,9 @@ useEffect(() => {
     // };
     const fetchChores = async () => {
       try {
+        
         const userInfo = await getUserInfo(userID);
         const houseID = userInfo?.house_id;
-    
         const houseMateChoresArr = await getHousemates(houseID);
         console.log("step1: ", houseMateChoresArr);
     

@@ -39,18 +39,24 @@ function Personal({navigation}) {
           const chores = await getXUsersChoreDataPersonal(userInfo);
           setCurrentUserChoreNames(chores);
 
-          setUpcomingText(chores[0].name + ": " + chores[0].tasks[0].name);
+          if (chores.length > 0) {
+            setUpcomingText(chores[0].name + ": " + chores[0].tasks[0]?.name || 'No tasks');
 
-          let counter = 0;
-          chores.forEach(room => {
-            room.tasks.forEach((chore) => {
-              if(!chore.choreStatus){
-                counter++;
-              }
-            })
-          });
+            let counter = 0;
+            chores.forEach(room => {
+              room.tasks.forEach((chore) => {
+                if (!chore.choreStatus) {
+                  counter++;
+                }
+              });
+            });
 
-          setNumChores(counter);
+            setNumChores(counter);
+          } else {
+            setUpcomingText('No chores available');
+            setNumChores(0);
+          }
+
           console.log('Chores fetched successfully:', chores);
         } catch (error) {
           console.error('Error fetching chore data:', error);

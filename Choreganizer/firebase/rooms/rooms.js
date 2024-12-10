@@ -3,6 +3,7 @@ import {auth, db} from "./../firebaseConfig";
 
 async function createRoom(roomName) {
     try {
+        //const user = auth.currentUser;
         //const roomRef = doc(db, "rooms", roomId.toString())
         const roomRef = await addDoc(collection(db, "rooms"), {
             name: roomName,
@@ -11,7 +12,12 @@ async function createRoom(roomName) {
         });
         console.log("room created successfully w/ id of ", roomRef.id);
         await updateDoc(roomRef, { id: roomRef.id });
-        //return ((await getDoc(roomRef) ).data())
+        //const userRef = collection(db, 'users'); //, user.uid);
+        //userQuery = query(userRef, where('uid', '==', user.uid));
+        //const userCheck = await getDocs(userQuery);
+        //const correct = userCheck.docs[0].house_id;
+        //await updateDoc(roomRef, { house: correct });
+        return ((await getDoc(roomRef) ).data())
         
     } catch (error) {
         console.error("Error creating room! error: ", error);

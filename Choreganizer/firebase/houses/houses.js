@@ -8,6 +8,7 @@ import {
   arrayUnion,
   query,
   where,
+  arrayRemove
 } from 'firebase/firestore';
 import {
   auth,
@@ -23,7 +24,7 @@ const functions = getFunctions();
 // Create a new house
 async function createHouse(houseName) {
   try {
-    const user = auth.currentUser;
+    //const user = auth.currentUser;
     const docRef = await addDoc(collection(db, 'houses'), {
       name: houseName || 'House',
       head_user: user.uid,
@@ -146,38 +147,38 @@ async function inviteUserToHouse(houseId, invitedEmails) {
 
 // Verify invitation
 async function verifyInvite(houseId, joinCode) {
-  try {
-    const user = auth.currentUser;
-    const houseRef = doc(db, 'houses', houseId);
-    const houseData = await getDoc(houseRef);
+    try {
+        const user = auth.currentUser;
+        const houseRef = doc(db, 'houses', houseId);
+        const houseData = await getDoc(houseRef);
 
-    if (!houseData.exists()) {
-      throw new Error(`House with ID ${houseId} does not exist.`);
+        if (!houseData.exists()) {
+            throw new Error(`House with ID ${houseId} does not exist.`);
+        }
+
+        const data = houseData.data();
+        const index = data.invitations.indexOf(user?.email);
+
+        if (index >= 0 && data.invitationCodes[index] === joinCode) {
+            // Update Firestore with new member and clear invitation
+            await updateDoc(houseRef, {
+                members: arrayUnion(user.uid),
+                invitations: data.invitations.filter((_, i) => i !== index),
+                invitationCodes: data.invitationCodes.filter((_, i) => i !== index),
+            }); // Link the user to the house in Firestore
+
+            const userRef = doc(db, 'users', user.uid);
+            await updateDoc(userRef, {house_id: houseId});
+
+            console.log('User successfully added to house');
+            //await redistributeChores(houseId);
+            console.log('ANd the chores were re-assigned to ppl!!!');
+        } else {
+            throw new Error('Invalid join code or email not invited.');
+        }
+    } catch (error) {
+        console.error('Error verifying invite:', error);
     }
-
-    const data = houseData.data();
-    const index = data.invitations.indexOf(user?.email);
-
-    if (index >= 0 && data.invitationCodes[index] === joinCode) {
-      // Update Firestore with new member and clear invitation
-      await updateDoc(houseRef, {
-        members: arrayUnion(user.uid),
-        invitations: data.invitations.filter((_, i) => i !== index),
-        invitationCodes: data.invitationCodes.filter((_, i) => i !== index),
-      }); // Link the user to the house in Firestore
-
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, {house_id: houseId});
-
-      console.log('User successfully added to house');
-      await redistributeChores(houseId);
-      console.log('ANd the chores were re-assigned to ppl!!!');
-    } else {
-      throw new Error('Invalid join code or email not invited.');
-    }
-  } catch (error) {
-    console.error('Error verifying invite:', error);
-  }
 }
 
 // Get housemates
@@ -241,152 +242,194 @@ async function getHousemates(houseId) {
 // }
 
 async function assignChorestoHouse(houseId) {
-  try {
-    const houseRef = doc(db, 'houses', houseId);
-    const choreRef = collection(db, 'chores');
+    try {
 
+        const houseRef = doc(db, 'houses', houseId);
+
+        const choreRef = collection(db, 'chores');
+        const choreQuery = query(choreRef, where('house', '==', houseId));
+        const choreSnapshot = await getDocs(choreQuery);
+
+        const choreDocs = choreSnapshot.docs.map(choreDoc => choreDoc.data().name);
+
+
+        if (choreDocs.length > 0) {
+            await updateDoc(houseRef, {
+                chores: choreDocs,
+            });
+            console.log('Chores assigned successfully to the house:', houseId);
+        } else {
+            console.log('No chores found for the house:', houseId);
+        }
+    } catch (error) {
+        console.error('Error assigning chore to house! error: ', error);
+    }
+}
+
+/*async function assignRoomstoHouse(houseId) {
+    try {
+
+        const houseRef = doc(db, 'houses', houseId);
+
+        const roomRef = collection(db, 'rooms');
+        const roomnQuery = query(roomRef, where('house', '==', houseId));
+        const choreSnapshot = await getDocs(choreQuery);
+
+        const choreDocs = choreSnapshot.docs.map(choreDoc => choreDoc.data().name);
+
+
+        if (choreDocs.length > 0) {
+            await updateDoc(houseRef, {
+                chores: choreDocs,
+            });
+            console.log('Chores assigned successfully to the house:', houseId);
+        } else {
+            console.log('No chores found for the house:', houseId);
+        }
+    } catch (error) {
+        console.error('Error assigning chore to house! error: ', error);
+    }
+}*/
+
+
+
+
+async function resetChoreDueDates(houseId) {
+    const houseRef = doc(db, 'houses', houseId);
+    const now = new Date();
+    const daysUntilSunday = (7 - now.getDay()) % 7;
+    const nextSundayMidnight = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + daysUntilSunday,
+    );
+    await updateDoc(houseRef, {choresDue: nextSundayMidnight});
+
+    const choreRef = collection(db, 'chores');
     const choreQuery = query(choreRef, where('house', '==', houseId));
     const choreSnapshot = await getDocs(choreQuery);
 
-    const choreDocs = choreSnapshot.docs.map(choreDoc => choreDoc.choreName);
-
-    if (choreDocs.length > 0) {
-      await updateDoc(houseRef, {
-        chores: choreDocs,
-      });
-      console.log('Chores assigned successfully to the house:', houseId);
-    } else {
-      console.log('No chores found for the house:', houseId);
+    for (const choreDoc of choreSnapshot.docs) {
+        const choreId = choreDoc.id;
+        await updateDoc(doc(db, 'chores', choreId), {choreDue: nextSundayMidnight});
     }
-    /*
-        const choreArray = [];
-        for (const choreDoc of choreSnapshot.docs) {
-            const choreData = choreDoc.data(); // Get the data from the document
-            const choreName = choreData.name; // Extract the "name" field
-            choreArray.push(choreName);
-        }
-        console.log("this is the arary of chores assigned to the house, ", choreArray)
-
-        const houseQuery = query(houseRef, where("id", "==", houseId));
-        const houseSnapshot = await getDocs(houseQuery);
-        const houseDoc = houseSnapshot.docs[0];
-
-        const chorePromises = choreArray.map(async (choreName) => {
-            const choreQuery = query(choreRef, where("name", "==", choreName));
-            const choreSnapshot = await getDocs(choreQuery);
-            if (!choreSnapshot.empty) {
-                return choreSnapshot.docs[0].id; // Return the ID of the chore
-            } else {
-                console.log(`Chore "${choreName}" not found`);
-                return null; // Return null for missing chores
-            }
-        });
-        const choreDocs = (await Promise.all(chorePromises)).filter(Boolean);
-
-        if (choreDocs.length > 0) {
-            const houseRef = doc(db, "houses", houseId); // Get the document reference for the room
-            await updateDoc(houseRef, {
-                chores: choreDocs  // Assign the chore IDs (or references) to the room
-            });
-            console.log("Chores assigned successfully to the house: ", houseId);
-        } else {
-            console.log("No valid chores to assign");
-        } */
-  } catch (error) {
-    console.error('Error assigning chore to house! error: ', error);
-  }
-}
-
-async function resetChoreDueDates(houseId) {
-  const houseRef = doc(db, 'houses', houseId);
-  const now = new Date();
-  const daysUntilSunday = (7 - now.getDay()) % 7;
-  const nextSundayMidnight = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate() + daysUntilSunday,
-  );
-  await updateDoc(houseRef, {choresDue: nextSundayMidnight});
-
-  const choreRef = collection(db, 'chores');
-  const choreQuery = query(choreRef, where('house', '==', houseId));
-  const choreSnapshot = await getDocs(choreQuery);
-
-  for (const choreDoc of choreSnapshot.docs) {
-    const choreId = choreDoc.id;
-    await updateDoc(doc(db, 'chores', choreId), {choreDue: nextSundayMidnight});
-  }
 }
 
 async function swapTimeChecker(houseId) {
-  const houseRef = doc(db, 'houses', houseId);
-  const houseSnap = await getDoc(houseRef);
-  const houseData = houseSnap.data();
-  const dueDate = houseData.choresDue;
-  const now = new Date();
-  // FOR DEMO-PURPOSES ONLY!!! DELETE LATER!!!! ARRAN DONT FORGET
-  now.setDate(now.getDate() + 2);
-  console.log('swaptimechecker: the rn date is: ', now);
-  const dueDateObj = dueDate.toDate ? dueDate.toDate() : new Date(dueDate);
-  console.log('swaptimechecker: the housechoredue date is: ', dueDateObj);
-  if (dueDateObj <= now) {
-    try {
-      const userRef = collection(db, 'users');
-      const choreRef = collection(db, 'chores');
+    const houseRef = doc(db, 'houses', houseId);
+    const houseSnap = await getDoc(houseRef);
+    const houseData = houseSnap.data();
+    const dueDate = houseData.choresDue;
+    const now = new Date();
+    // FOR DEMO-PURPOSES ONLY!!! DELETE LATER!!!! ARRAN DONT FORGET
 
-      const userQuery = query(userRef, where('house_id', '==', houseId));
-      const choreQuery = query(choreRef, where('house', '==', houseId));
+    //now.setDate(now.getDate() + 10);
+    console.log('swaptimechecker: the rn date is: ', now);
+    //await redistributeChores(houseId);
+    const dueDateObj = dueDate.toDate ? dueDate.toDate() : new Date(dueDate);
+    console.log('swaptimechecker: the housechoredue date is: ', dueDateObj);
+    if (dueDateObj <= now) {
+        console.log("the date was due, swapping chores!!!");
+        redistributeChores(houseId);
+        // try {
+        //     const userRef = collection(db, 'users');
+        //     const choreRef = collection(db, 'chores');
 
-      const userSnapshot = await getDocs(userQuery);
-      const choreSnapshot = await getDocs(choreQuery);
+        //     const userQuery = query(userRef, where('house_id', '==', houseId));
+        //     const choreQuery = query(choreRef, where('house', '==', houseId));
 
-      const users = userSnapshot.docs.map(doc => ({
-        id: doc.id,
-        choresAssigned: doc.data().choreAssigned || [],
-      }));
+        //     const userSnapshot = await getDocs(userQuery);
+        //     const choreSnapshot = await getDocs(choreQuery);
 
-      const numUsers = users.length;
+        //     console.log("line 341 done!");
 
-      if (numUsers < 2) {
-        console.log('Not enough users to shift chores.');
-        return;
-      }
+        //     const users = userSnapshot.docs.map(doc => ({
+        //         id: doc.data().id,
+        //         choresAssigned: doc.data().choreAssigned || [],
+        //     }));
 
-      for (let i = 0; i < numUsers; i++) {
-        const nextIndex = (i + 1) % numUsers;
-        users[i].nextUserId = users[nextIndex].id;
-      }
+        //     console.log("line 349 this is what users is: ", users);
+        //     const numUsers = users.length;
+        //     if (numUsers < 2) {
+        //         console.log('Not enough users to shift chores.');
+        //         return;
+        //     }
 
-      const updates = [];
+        //     // Map current users to the next users
+        //     const userMap = new Map();
+        //     for (let i = 0; i < numUsers; i++) {
+        //         const nextIndex = (i + 1) % numUsers;
+        //         userMap.set(users[i].id, users[nextIndex].id);
+        //     }
 
-      for (const user of users) {
-        const choresToReassign = user.choresAssigned;
-        updates.push(
-          updateDoc(doc(db, 'users', user.id), {
-            choreAssigned: [],
-          }),
-        );
+        //     const updates = [];
 
-        for (const choreId of choresToReassign) {
-          updates.push(
-            updateDoc(doc(db, 'chores', choreId), {
-              choreUser: user.nextUserId,
-            }),
-          );
-          updates.push(
-            updateDoc(doc(db, 'users', user.nextUserId), {
-              choreAssigned: arrayUnion(choreId),
-            }),
-          );
-        }
-      }
-      await Promise.all(updates);
-      await resetChoreDueDates(houseId);
-      console.log('Successfully shifted chores to the next user.');
-    } catch (error) {
-      console.error('Error shifting chores to next user! Error:', error);
+        //     //const numUsers = users.length;
+        //     //console.log("line 349 done!");
+
+        //     //if (numUsers < 2) {
+        //     //    console.log('Not enough users to shift chores.');
+        //     //    return;
+        //     //}
+
+        //     //for (let i = 0; i < numUsers; i++) {
+        //     //    const nextIndex = (i + 1) % numUsers;
+        //     //    users[i].nextUserId = users[nextIndex].id;
+        //     //}
+        //     console.log("line 360 done!, this is users now: ", users);
+
+        //     //const updates = [];
+        //     /*
+        //     for (const user of users) {
+        //         const choresToReassign = user.choresAssigned;
+        //         updates.push(
+        //             updateDoc(doc(db, 'users', user.id), {
+        //                 choreAssigned: [],
+        //             }),
+        //         );
+
+        //         for (const choreId of choresToReassign) {
+        //             updates.push(
+        //                 updateDoc(doc(db, 'chores', choreId), {
+        //                 choreUser: user.nextUserId,
+        //                 }),
+        //             );
+        //             updates.push(
+        //                 updateDoc(doc(db, 'users', user.nextUserId), {
+        //                 choreAssigned: arrayUnion(choreId),
+        //                 }),
+        //             );
+        //         }
+        //     }*/
+        //     for (const user of users) {
+        //         const choresToReassign = user.choresAssigned;
+        //         for (const choreId of choresToReassign) {
+        //             const nextUserId = userMap.get(user.id);
+        //             updates.push(
+        //                 updateDoc(doc(db, 'chores', choreId), {
+        //                     choreUser: nextUserId,
+        //                 })
+        //             );
+        //             updates.push(
+        //                 updateDoc(doc(db, 'users', nextUserId), {
+        //                     choreAssigned: arrayUnion(choreId),
+        //                 })
+        //             );
+        //             updates.push(
+        //                 updateDoc(doc(db, 'users', user.id), {
+        //                     choreAssigned: arrayRemove(choreId),
+        //                 })
+        //             );
+        //         }
+        //     }
+        //     console.log("line 385 done!");
+        //     await Promise.all(updates);
+        //     await resetChoreDueDates(houseId);
+        //     console.log('Successfully shifted chores to the next user.');
+        // } catch (error) {
+        //     console.error('Error shifting chores to next user! Error:', error);
+        // }
     }
-  }
 }
 //const choreQuery = query(houseRef, where("due", "==", houseId));
 
