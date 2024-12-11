@@ -189,12 +189,10 @@ async function inviteUserToHouse(houseId, invitedEmails) {
 
       console.log("Updating Firestore for invitee:", invitee);
       // Update Firestore with invitation data
-      await runTransaction(db, async (transaction) => {
-        transaction.update(houseRef, {
-          invitations: arrayUnion(invitee),
-          invitationCodes: arrayUnion(joinCode),
-        })
-      })
+      await updateDoc(houseRef, {
+        invitations: arrayUnion(invitee),
+        invitationCodes: arrayUnion(joinCode),
+      });
       console.log("Firestore updated successfully for:", invitee);
       const emailText = `Your join code is: ${joinCode}`;
       // Send email notification
@@ -258,8 +256,8 @@ async function verifyInvite(joinCode) {
           throw new Error("User not found.");
         }
     
-        const userData = querySnapshot.docs[0].data();
-        const userRef = querySnapshot.docs[0].ref;
+        const userData = (await querySnapshot.docs[0]).data();
+        const userRef = (await querySnapshot.docs[0]).ref;
 //         const houseRef = doc(db, "houses", houseId);
         const houseCollection = collection(db, "houses");
         const houseQ = query(houseCollection, where('invitations', 'array-contains', userData.email));
@@ -267,7 +265,7 @@ async function verifyInvite(joinCode) {
         if (houseQuerySnapshot.empty) {
           throw new Error("House does not exist.");
         }
-        const houseDoc = houseQuerySnapshot.docs[0];
+        const houseDoc = await houseQuerySnapshot.docs[0];
         const houseRef = houseDoc.ref;
         if (!houseDoc) {
           throw new Error("House document does not exist")
@@ -434,7 +432,7 @@ async function swapTimeChecker(houseId) {
   const dueDate = houseData.choresDue;
   const now = new Date();
   // FOR DEMO-PURPOSES ONLY!!! DELETE LATER!!!! ARRAN DONT FORGET
-  //now.setDate(now.getDate() + 10);
+  now.setDate(now.getDate() + 10);
 
   console.log('swaptimechecker: the rn date is: ', now);
   //await redistributeChores(houseId);
@@ -442,7 +440,7 @@ async function swapTimeChecker(houseId) {
   console.log('swaptimechecker: the housechoredue date is: ', dueDateObj);
   if (dueDateObj <= now) {
       console.log("the date was due, swapping chores!!!");
-      redistributeChores(houseId);
+      await redistributeChores(houseId);
   }
 }
 

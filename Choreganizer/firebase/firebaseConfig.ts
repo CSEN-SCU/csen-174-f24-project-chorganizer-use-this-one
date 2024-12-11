@@ -3,8 +3,9 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from "firebase/auth";
 import { getFirestore} from "firebase/firestore";
 import { SignUpNewUser, SignInUser, toggleNotifs, getUserInfo } from "./users/users";
+import { addMessNotification} from "./notifs/notifications";
 import { createRoom, assignChorestoRooms, assignUser } from "./rooms/rooms.js";
-import { createHouse, inviteUserToHouse, verifyInvite, getHousemates } from './houses/houses.js';
+import { createHouse, inviteUserToHouse, verifyInvite, getHousemates, swapTimeChecker, assignChorestoHouse} from './houses/houses.js';
 import { createChore, assignChorestoUsers, checkDueDate, updateStatus, getXUsersChoreData, getXUsersChoreDataPersonal, redistributeChores, newSignintoHouseSwapChores } from './chores/chores.js';
 import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
 
@@ -27,4 +28,4 @@ const db = getFirestore(app);
 const functions = getFunctions(app);
 connectFunctionsEmulator(functions, "127.0.0.1", 5001);
 
-export { app, auth, db, SignUpNewUser, SignInUser, getUserInfo, createHouse, inviteUserToHouse, getHousemates, toggleNotifs, createChore, assignChorestoUsers, checkDueDate, updateStatus, createRoom, assignChorestoRooms, assignUser, getXUsersChoreData, getXUsersChoreDataPersonal, assignChorestoHouse, swapTimeChecker, redistributeChores,newSignintoHouseSwapChores, verifyInvite };
+export { app, auth, db, SignUpNewUser, SignInUser, getUserInfo, createHouse, inviteUserToHouse, getHousemates, toggleNotifs, createChore, assignChorestoUsers, checkDueDate, updateStatus, createRoom, assignChorestoRooms, assignUser, getXUsersChoreData, getXUsersChoreDataPersonal, assignChorestoHouse, swapTimeChecker, redistributeChores,newSignintoHouseSwapChores, verifyInvite, addMessNotification };

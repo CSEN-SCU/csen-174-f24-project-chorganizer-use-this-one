@@ -74,6 +74,7 @@ useEffect(() => {
       try {
         
         const userInfo = await getUserInfo(userID);
+
         const houseID = userInfo?.house_id;
         const houseMateChoresArr = await getHousemates(houseID);
         console.log("step1: ", houseMateChoresArr);
@@ -83,8 +84,9 @@ useEffect(() => {
             const userChoreData = await getXUsersChoreData(housemate.uid);
             return {
               name: housemate.name,
-              chores: userChoreData,
-              id: housemate.id
+              chores: userChoreData
+              //REMOVE LATER ARRAN
+              //id: housemate.id
             };
           })
         );
@@ -276,14 +278,16 @@ useEffect(() => {
                         </Text>
                         <Text style={styles.choreTitle}>{chore.name}</Text>
                       </View>
-                      <TouchableOpacity onPress={() => {
-                        addNotification(auth.currentUser!.uid, housemates[currentChoreIndex].name, chore.title)
+                      <TouchableOpacity onPress={async ()=> {
+                        await addNotification(auth.currentUser!.uid, housemates[currentChoreIndex].name, chore.name);
                         // TODO: change the email to be the receiver user's email
-                        sendBumpNotification(auth.currentUser!.uid, chore.title)
-                        Alert.alert(`${housemates[currentChoreIndex].name} has been bumped!`);
+                        //getBumpedUser(chore.title);
+                        const Bumpeename = await sendBumpNotification(auth.currentUser!.uid, chore.name);
+                        console.log("numppeename = ", Bumpeename);
+                        Alert.alert(`${Bumpeename} has been bumped!`);
 
                       }} style={styles.fistBumpButton}>
-                        <Text style={styles.fistBumpIcon}>👊</Text>
+                        <Text style={styles.fistBumpIcon}>{chore.choreStatus ? "✅" : "👊"}</Text>
 
                       </TouchableOpacity>
                     </View>

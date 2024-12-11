@@ -1,5 +1,5 @@
-import {db} from "../firebaseConfig";
-import {collection, query, where, CollectionReference, doc, getDoc, setDoc, updateDoc, onSnapshot } from "firebase/firestore";
+import { db, getUserInfo } from "../firebaseConfig";
+import { collection, query, where, CollectionReference, doc, getDoc, setDoc, updateDoc, onSnapshot, getDocs } from "firebase/firestore";
 import { NotificationTemplate, NotificationConverter, NotificationTag } from "../types/notification";
 import { getFunctions, httpsCallable } from "firebase/functions";
 
@@ -13,8 +13,12 @@ const functions = getFunctions();
 const getHouseByUserId = async(userId: string): Promise<string | null> => {
   try {
     // Get the user document
-    const userDoc = await getDoc(doc(db, "users", userId));
-    if (!userDoc.exists()) {
+    const userRef = collection(db, 'users'); //, user.uid);
+    const userQuery = query(userRef, where('uid', '==', userId));
+    const userCheck = await getDocs(userQuery);
+    const userDoc = userCheck.docs[0];
+    //const userDoc = await getDoc(doc(db, "users", userId));
+    if (!userDoc) {
       // If the user document doesn't exist, throw an error
       throw new Error("No such user");
     }
@@ -82,13 +86,29 @@ const getRoomateIdByUserId = async (user_id: string): Promise<string[]> => {
     const house_docRef = await getDoc(doc(db, `houses/${house_id}`));
 
     console.log(house_id)
-    if (!house_docRef.exists()) {
+    if (!house_docRef) {
       throw new Error("No such home");
     }
 
     // Get the members of the home
-    const members = house_docRef.data().members;
-    return members;
+    const members = house_docRef.data()?.members;
+    const membersIDs = [];
+    //const userRef = collection(db, 'users'); //, user.uid);
+    //userQuery = query(userRef, where('uid', '==', user.uid));
+    //const userCheck = await getDocs(userQuery);
+    //const correct = userCheck.docs[0].ref;
+    
+    //const userDoc = userCheck.docs[0].ref;
+
+    members.forEach( async (member) => {
+      const userRef = collection(db, 'users'); //, user.uid);
+      const userQuery = query(userRef, where('uid', '==', member));
+      const userCheck = await getDocs(userQuery);
+      membersIDs.push(userCheck.docs[0].id);
+    })
+
+    //return members;
+    return membersIDs;
   } catch (e) {
     console.error("Error getting roomate by user id: ", e);
     throw e;
@@ -104,11 +124,26 @@ const getRoomateIdByUserId = async (user_id: string): Promise<string[]> => {
 export const addMessNotification = async (user_id: string, mess_id: string, report_text: string) => {
   let docRef_id : string | null = null
   try {
-    const members = await getRoomateIdByUserId(user_id)
+    //const members = await getRoomateIdByUserId(user_id)
+    const house_id = await getHouseByUserId(user_id);
+    console.log("i am addmessnotif, i used func gethousebyuid", house_id);
+
+
+    const houseRef = collection(db, 'houses'); //, user.uid);
+    const houseQuery = query(houseRef, where('id', '==', house_id));
+    const houseCheck = await getDocs(houseQuery);
+    const correct = houseCheck.docs[0].data().members;
+
+    //console.log("Get roomate by user id House ID:", house_id);
+    //const house_docRef = await getDoc(doc(db, `houses/${house_id}`));
+    //const houseQuery = query(userRef, where('uid', '==', user.uid));
+    console.log("i am members", correct);
 
     // Add a notification for each member
-    for (const member_id of members) {
+    for (const member_id of correct) {
+      console.log("i am in addmess notif, here is members", correct,  "here is current member id", member_id);
       const collectionRef = getNotificationCollection(member_id);
+      console.log("weird ref:", collectionRef);
       const docRef = doc(collectionRef);
 
       // Create the notification data
@@ -136,11 +171,19 @@ export const addMessNotification = async (user_id: string, mess_id: string, repo
 
 const getEmailByUserId = async (user_id: string): Promise<string> => {
   try {
-    const userDoc = await getDoc(doc(db, "users", user_id));
-    if (!userDoc.exists()) {
+    
+    const userRef = collection(db, 'users'); //, user.uid);
+    const userQuery = query(userRef, where('uid', '==', user_id));
+    const userCheck = await getDocs(userQuery);
+    const correct = userCheck.docs[0];
+
+    //const userDoc = await getDoc(doc(db, "users", user_id));
+    console.log("userDOc",correct);
+    if (!correct) {
       throw new Error("No such user");
     }
-    const userData = userDoc.data();
+    const userData = correct.data();
+    console.log("userData",userData);
     const email = userData?.email;
     return email;
   } catch (e) {
@@ -153,10 +196,17 @@ export const emailMessNotification = async (user_id: string, report_text: string
   try {
 
     // Get the email for each member
-    const members = await getRoomateIdByUserId(user_id);
+    //const members = await getRoomateIdByUserId(user_id);
+    const houseId = (await getUserInfo(user_id)).house_id;
+    const houseRef = collection(db, 'houses'); //, user.uid);
+    const houseQuery = query(houseRef, where('id', '==', houseId));
+    const houseCheck = await getDocs(houseQuery);
+    const members = houseCheck.docs[0].data().members;
+    
     const emails = await Promise.all(
       members.map(async (member_id) => await getEmailByUserId(member_id))
     );
+    console.log("there r the emails found in functoin blajh ", emails);
 
     // Send an email notification to each member of the household about the mess
     const sendEmailNotification = httpsCallable(functions, "sendEmailNotification");
@@ -190,11 +240,28 @@ export const emailMessNotification = async (user_id: string, report_text: string
 
 export const sendBumpNotification = async (receiver_id: string, chore_descr : string) => {
   try {
-    const email = await getEmailByUserId(receiver_id);
+    console.log("sendbumpnotif, choredesc", chore_descr);
+    const choreRef = collection(db, 'chores'); //, user.uid);
+    
+    const choreQuery = query(choreRef, where('name', '==', chore_descr));
+    const choreCheck = await getDocs(choreQuery);
+    const correct = choreCheck.docs[0].data();
+    const AssignedUser = correct.choreUser;
+    console.log("assignedUser:", AssignedUser);
+
+    const userRef = collection(db, 'users'); //, user.uid);
+    const userQuery = query(userRef, where('id', '==', AssignedUser));
+    const userCheck = await getDocs(userQuery);
+    const userDataEmail = (await userCheck.docs[0]).data().email;
+    const userDataName = (await userCheck.docs[0].data()).name;
+
+    console.log("assignedUser:", AssignedUser, "userDataEmail: ", userDataEmail, "userDataName: ", userDataName);
+    
+    //const email = await getEmailByUserId(receiver_id);
     const sendEmailNotification = httpsCallable(functions, "sendEmailNotification");
   
     const emailNotification = {
-      to: email,
+      to: userDataEmail,
       subject: "You got a bump!",
       text: "A roommate has bumped you for the chore: " + chore_descr,
     };
@@ -203,6 +270,8 @@ export const sendBumpNotification = async (receiver_id: string, chore_descr : st
     // Call Firebase function
     const response = await sendEmailNotification(emailNotification);
     console.log(`Email sent successfully: ${response.data}`);
+
+    return(userDataName);
     
   }catch (error) {
     console.error(`Error sending email to ${receiver_id} notifications:`, error);
@@ -218,7 +287,10 @@ export const sendBumpNotification = async (receiver_id: string, chore_descr : st
  * @returns A function to unsubscribe from the real-time listener.
  */
 export function listenForUnreadNotifications(userId: string, setNotifications: (notifications: NotificationTemplate[]) => void) {
-
+    /*const userRef = collection(db, 'users'); //, user.uid);
+    const userQuery = query(userRef, where('uid', '==', user.uid));
+    const userCheck = await getDocs(userQuery);
+    const correct = userCheck.docs[0];*/
   // Reference to the user's notifications collection
   const notificationsRef = getNotificationCollection(userId);
 

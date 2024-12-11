@@ -15,7 +15,7 @@ import {
   getXUsersChoreDataPersonal,
   auth,
 } from '../firebase/firebaseConfig';
-import {collection, onSnapshot} from 'firebase/firestore';
+import {collection, onSnapshot, doc, getDoc} from 'firebase/firestore';
 import {db} from '../firebase/firebaseConfig';
 
 function Personal({navigation}) {
@@ -28,16 +28,26 @@ function Personal({navigation}) {
   );
   const [upcomingText, setUpcomingText] = useState("");
 
-  useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'chores'), snapshot => {
+  useEffect( () => {
+    const unsubscribe = onSnapshot(collection(db, 'chores'), async snapshot => {
       if (!userInfo) return;
+
+      const choreStatusRef = doc(db, 'system', 'choreStatus');
+      const choreStatusSnap = await getDoc(choreStatusRef);
+
+      if (choreStatusSnap.exists() && choreStatusSnap.data().isRedistributing) {
+        console.log('Redistribution in progress. Skipping fetchChores.');
+        return;
+      }
+
       const fetchChores = async () => {
         try {
           const userInfoForStreak = await getUserInfo(userInfo);
-          setUserStreak(userInfoForStreak.streak);
+          await setUserStreak(userInfoForStreak.streak);
 
           const chores = await getXUsersChoreDataPersonal(userInfo);
-          setCurrentUserChoreNames(chores);
+          console.log("right after getXUsers in Personal", chores);
+          await setCurrentUserChoreNames(chores);
 
           if (chores.length > 0) {
             setUpcomingText(chores[0].name + ": " + chores[0].tasks[0]?.name || 'No tasks');

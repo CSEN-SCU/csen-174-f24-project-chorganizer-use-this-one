@@ -29,7 +29,7 @@ function AuthScreen(): React.JSX.Element {
         
         //await assignChorestoHouse(houseId);
         //await redistributeChores(houseId);
-        await newSignintoHouseSwapChores(houseId);
+        //await newSignintoHouseSwapChores(houseId);
         await swapTimeChecker(houseId);
         //console.log("house was swap timne checker-ed!!!!!!");
       } else {

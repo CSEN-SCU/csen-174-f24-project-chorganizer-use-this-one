@@ -86,7 +86,91 @@ async function assignChorestoUsers(houseId) {
     console.error('Error assigning chore to user! error: ', error);
   }
 }
+
 async function redistributeChores(houseId) {
+  try {
+    const choreStatusRef = doc(db, 'system', 'choreStatus');
+    await setDoc(choreStatusRef, { isRedistributing: true });
+
+    const userRef = collection(db, 'users');
+    const choreRef = collection(db, 'chores');
+    const choreQuery = query(choreRef, where('house', '==', houseId));
+    const userQuery = query(userRef, where('house_id', '==', houseId));
+    const choreSnapshot = await getDocs(choreQuery);
+    const userSnapshot = await getDocs(userQuery);
+
+    const users = userSnapshot.docs.map(userDoc => ({
+      id: userDoc.id,
+      choresAssigned: userDoc.data().choreAssigned || [],
+    }));
+
+    const chores = choreSnapshot.docs.map(choreDoc => ({
+      id: choreDoc.id,
+      name: choreDoc.data().name,
+    }));
+
+    const numUsers = users.length;
+    const numChores = chores.length;
+    if (numUsers === 0 || numChores === 0) {
+      console.log('No users or chores available to assign.');
+      await updateDoc(choreStatusRef, { isRedistributing: false });
+      return;
+    }
+
+    // Map user IDs to their previously assigned chores
+    const previousAssignments = new Map();
+    for (const user of users) {
+      previousAssignments.set(user.id, new Set(user.choresAssigned));
+    }
+    const updates = [];
+    let userIndex = 0;
+
+    for (const chore of chores) {
+      let assignedUser = null;
+      // Find a user who has not had this chore before
+      for (let attempts = 0; attempts < numUsers; attempts++) {
+        const potentialUser = users[userIndex];
+        if (!previousAssignments.get(potentialUser.id).has(chore.id)) {
+          assignedUser = potentialUser;
+          break;
+        }
+        userIndex = (userIndex + 1) % numUsers; // Rotate to next user
+      }
+      // If no eligible user is found (fallback to round-robin)
+      if (!assignedUser) {
+        assignedUser = users[userIndex];
+      }
+      console.log(`Assigning chore "${chore.name}" to user "${assignedUser.id}"`);
+      updates.push(
+        updateDoc(doc(db, 'chores', chore.id), { choreUser: assignedUser.id })
+      );
+      updates.push(
+        updateDoc(doc(db, 'users', assignedUser.id), {
+          choreAssigned: arrayUnion(chore.id), // Add chore to user's list
+        })
+      );
+      for (const user of users) {
+        if (user.id !== assignedUser.id && user.choresAssigned.includes(chore.id)) {
+          updates.push(
+            updateDoc(doc(db, 'users', user.id), {
+              choreAssigned: arrayRemove(chore.id),
+            })
+          );
+        }
+      }
+      userIndex = (userIndex + 1) % numUsers;
+    }
+    console.log("Applying updates...");
+    await Promise.all(updates);
+    console.log('Successfully redistributed chores.');
+    await updateDoc(choreStatusRef, { isRedistributing: false });
+  } catch (error) {
+    console.error('Error redistributing chores! Error: ', error);
+    await updateDoc(choreStatusRef, { isRedistributing: false });
+  }
+}
+
+/*async function redistributeChores(houseId) {
   try {
     const userRef = collection(db, 'users');
     const choreRef = collection(db, 'chores');
@@ -162,10 +246,14 @@ async function redistributeChores(houseId) {
   } catch (error) {
     console.error('Error redistributing chores! Error: ', error);
   }
-}
+}*/
+
+
 
 async function newSignintoHouseSwapChores(houseId) {
   try {
+    const choreStatusRef = doc(db, 'system', 'choreStatus');
+    await setDoc(choreStatusRef, { isRedistributing: true });
     const userRef = collection(db, 'users');
     const choreRef = collection(db, 'chores');
 
@@ -190,11 +278,10 @@ async function newSignintoHouseSwapChores(houseId) {
 
     if (numUsers === 0 || numChores === 0) {
       console.log('No users or chores available to assign.');
+      await updateDoc(choreStatusRef, { isRedistributing: false });
       return;
     }
-
     let userIndex = 0;
-
     const updates = [];
     for (const chore of chores) {
       const assignedUser = users[userIndex];
@@ -211,21 +298,22 @@ async function newSignintoHouseSwapChores(houseId) {
       );
       for (const user of users) {
         if (user.id !== assignedUser.id && user.choresAssigned.includes(chore.id)) {
-          updates.push(
-            updateDoc(doc(db, 'users', user.id), {
+          await updates.push(
+            await updateDoc(doc(db, 'users', user.id), {
               choreAssigned: arrayRemove(chore.id),
             })
           );
         }
       }
-
       userIndex = (userIndex + 1) % numUsers;
     }
 
     console.log("Applying updates...");
     await Promise.all(updates);
-    console.log('Successfully redistributed chores.');
+    console.log('Successfully swapped arround chores in not time based function.');
+    await updateDoc(choreStatusRef, { isRedistributing: false });
   } catch (error) {
+    await updateDoc(choreStatusRef, { isRedistributing: false });
     console.error('Error redistributing chores! Error: ', error);
   }
 } 
@@ -344,10 +432,53 @@ async function getXUsersChoreData(userId) {
   //const justNames = justChoreNamesArray.name;
   const justChoreNamesArray = await choreSnapshot.docs.map(doc => doc.data());
 
+  console.log("i dont think i will show up?");
   console.log(correct, " user's chores r these: ", justChoreNamesArray);
   return justChoreNamesArray;
 }
 
+
+
+
+/*async function getXUsersChoreDataPersonal(userId) {
+  const userRef = await collection(db, 'users');
+  userQuery = await query(userRef, where('uid', '==', userId));
+  const userCheck = await getDocs(userQuery);
+  const correct = userCheck.docs[0].id;
+
+  //console.log(correct);
+
+  const choreRef = await collection(db, 'chores');
+  const choreQuery = await query(choreRef, where('choreUser', '==', correct));
+  const choreSnapshot = await getDocs(choreQuery);
+
+  //const justChoreNamesArray = choreSnapshot.data();
+  //const justNames = justChoreNamesArray.name;
+  const justChoreNamesArray = await choreSnapshot.docs.map(doc => doc.data());
+
+  //go through array and break into array with object keys as rooms and chores as arrays
+  const formattedData = justChoreNamesArray.reduce((result, chore) => {
+    const roomName = chore.roomId; // Use roomId as the room name
+    // Find the existing room entry or create a new one
+    let roomEntry = result.find(room => room.name === roomName);
+    if (!roomEntry) {
+      roomEntry = {name: roomName, tasks: []};
+      result.push(roomEntry);
+    }
+
+    // Add the task to the room
+    roomEntry.tasks.push(chore);
+
+    return result;
+  }, []);
+
+  console.log(correct, " user's chores r these: ", formattedData);
+  //if(formattedData[0].name = "undefined"){
+    //const fakeReturn = [{"name": "R1C1", "tasks": [[Object], [Object]]}];
+    //return fakeReturn;
+  //}
+  return formattedData;
+}*/
 async function getXUsersChoreDataPersonal(userId) {
   const userRef = await collection(db, 'users');
   userQuery = await query(userRef, where('uid', '==', userId));
