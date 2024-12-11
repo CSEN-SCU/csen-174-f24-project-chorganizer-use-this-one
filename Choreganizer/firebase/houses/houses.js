@@ -50,7 +50,7 @@ async function createHouse(houseName) {
 
     console.log('House created successfully with docRef of ', docRef);
 
-    const userRef = collection(db, 'users'); //, user.uid);
+    const userRef = collection(db, 'users'); 
     userQuery = query(userRef, where('uid', '==', user.uid));
     const userCheck = await getDocs(userQuery);
     const correct = userCheck.docs[0].ref;
@@ -431,8 +431,10 @@ async function swapTimeChecker(houseId) {
   const houseData = houseSnap.data();
   const dueDate = houseData.choresDue;
   const now = new Date();
+  
+  
   // FOR DEMO-PURPOSES ONLY!!! DELETE LATER!!!! ARRAN DONT FORGET
-  now.setDate(now.getDate() + 10);
+  //now.setDate(now.getDate() + 10);
 
   console.log('swaptimechecker: the rn date is: ', now);
   //await redistributeChores(houseId);

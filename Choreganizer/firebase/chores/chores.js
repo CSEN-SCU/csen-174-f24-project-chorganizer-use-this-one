@@ -32,6 +32,7 @@ async function createChore(
       choreStatus: choreStatus || false,
       choreUser: choreUserId || null,
       choreNotifId: [choreNotifId],
+      fakeData: false,
     });
     console.log('Chore created successfully w/ id of ', choreRef.id);
     await updateDoc(choreRef, {id: choreRef.id});

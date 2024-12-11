@@ -28,7 +28,7 @@ function Personal({navigation}) {
   );
   const [upcomingText, setUpcomingText] = useState("");
 
-  useEffect( () => {
+  useEffect(()  =>  {
     const unsubscribe = onSnapshot(collection(db, 'chores'), async snapshot => {
       if (!userInfo) return;
 
@@ -74,8 +74,59 @@ function Personal({navigation}) {
       };
       fetchChores();
     });
-    return () => {unsubscribe()};
+
+    const unsubscribeUsers = onSnapshot(collection(db, 'system'), async (snapshot) => {
+      if (!userInfo) return;
+
+      const choreStatusRef = doc(db, 'system', 'choreStatus');
+      const choreStatusSnap = await getDoc(choreStatusRef);
+
+      if (choreStatusSnap.exists() && choreStatusSnap.data().isRedistributing) {
+        console.log('Redistribution in progress. Skipping fetchChores.');
+        return;
+      }
+
+      const fetchChores = async () => {
+        try {
+          const userInfoForStreak = await getUserInfo(userInfo);
+          await setUserStreak(userInfoForStreak.streak);
+
+          const chores = await getXUsersChoreDataPersonal(userInfo);
+          console.log("right after getXUsers in Personal", chores);
+          await setCurrentUserChoreNames(chores);
+
+          if (chores.length > 0) {
+            setUpcomingText(chores[0].name + ": " + chores[0].tasks[0]?.name || 'No tasks');
+
+            let counter = 0;
+            chores.forEach(room => {
+              room.tasks.forEach((chore) => {
+                if (!chore.choreStatus) {
+                  counter++;
+                }
+              });
+            });
+
+            setNumChores(counter);
+          } else {
+            setUpcomingText('No chores available');
+            setNumChores(0);
+          }
+
+          console.log('Chores fetched successfully:', chores);
+        } catch (error) {
+          console.error('Error fetching chore data:', error);
+        }
+      };
+      fetchChores();
+    });
+
+    return () => {
+      unsubscribe(); 
+      unsubscribeUsers();
+    };
   }, [, userInfo]);
+
 
   const renderItem = ({item}) => {
     switch (item.key) {

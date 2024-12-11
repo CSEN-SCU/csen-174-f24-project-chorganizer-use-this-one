@@ -10,7 +10,8 @@ import {
   ImageBackground,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {SignInUser, SignUpNewUser, swapTimeChecker, assignChorestoHouse, redistributeChores, newSignintoHouseSwapChores} from '../firebase/firebaseConfig';
+import {db, auth, SignInUser, SignUpNewUser, swapTimeChecker, assignChorestoHouse, redistributeChores, newSignintoHouseSwapChores, getXUsersChoreData} from '../firebase/firebaseConfig';
+import { setDoc, doc, collection, query, where, getDocs, updateDoc} from 'firebase/firestore';
 
 function AuthScreen(): React.JSX.Element {
   const [email, setEmail] = useState('');
@@ -29,8 +30,20 @@ function AuthScreen(): React.JSX.Element {
         
         //await assignChorestoHouse(houseId);
         //await redistributeChores(houseId);
-        //await newSignintoHouseSwapChores(houseId);
+        await newSignintoHouseSwapChores(houseId);
         await swapTimeChecker(houseId);
+
+        const user = auth.currentUser;
+        const userRef = collection(db, 'chores'); //, user.uid);
+        const userQuery = query(userRef, where('gouse', '==', houseId));
+        const userCheck = await getDocs(userQuery);
+        const correct = userCheck.docs[0].ref;
+
+        //console.log('correct is:', correct);
+
+        await updateDoc(correct, {fakeData: true});
+
+        //await getXUsersChoreData(user?.uid);
         //console.log("house was swap timne checker-ed!!!!!!");
       } else {
         navigation.navigate('Launch' as never);
