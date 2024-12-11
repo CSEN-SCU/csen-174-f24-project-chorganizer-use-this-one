@@ -185,9 +185,6 @@ function Personal({navigation}) {
         source={require('../assets/images/backgroundBlur.png')}
         style={styles.background}
         resizeMode="cover">
-        <Pressable onPress={() => navigation.navigate('Auth')}>
-          <Text>DEV ROUTE: Load Auth</Text>
-        </Pressable>
         <FlatList
           data={[{key: 'header'}, {key: 'thumbnails'}, {key: 'chores'}]}
           renderItem={renderItem}
